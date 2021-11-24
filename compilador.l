@@ -363,7 +363,7 @@ div {
 }
 
 {ident} {
-  simbolo = s_identificador;
+  simbolo = simb_identificador;
   strncpy(token, yytext, TAM_TOKEN);
   IMPRIME(" ident  ");
   return IDENT;

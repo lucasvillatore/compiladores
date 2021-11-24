@@ -1,6 +1,40 @@
 Terminals unused in grammar
 
     ATRIBUICAO
+    LABEL
+    TYPE
+    ARRAY
+    OF
+    PROCEDURE
+    FUNCTION
+    GOTO
+    IF
+    THEN
+    ELSE
+    WHILE
+    DO
+    MAIS
+    MENOS
+    MULTIPLICACAO
+    BOOL
+    OR
+    AND
+    NOT
+    ABRE_COLCHETES
+    FECHA_COLCHETES
+    IGUAL
+    MENOR
+    MAIOR
+    DIFERENTE
+    MAIOR_IGUAL
+    MENOR_IGUAL
+    READ
+    WRITE
+    FALSE
+    TRUE
+    INTEGER
+    DIV
+    NUMERO
 
 
 Grammar
@@ -60,58 +94,92 @@ Terminals, with rules where they appear
     VAR (267) 7
     IDENT (268) 2 14 15 16 17 18
     ATRIBUICAO (269)
+    LABEL (270)
+    TYPE (271)
+    ARRAY (272)
+    OF (273)
+    PROCEDURE (274)
+    FUNCTION (275)
+    GOTO (276)
+    IF (277)
+    THEN (278)
+    ELSE (279)
+    WHILE (280)
+    DO (281)
+    MAIS (282)
+    MENOS (283)
+    MULTIPLICACAO (284)
+    BOOL (285)
+    OR (286)
+    AND (287)
+    NOT (288)
+    ABRE_COLCHETES (289)
+    FECHA_COLCHETES (290)
+    IGUAL (291)
+    MENOR (292)
+    MAIOR (293)
+    DIFERENTE (294)
+    MAIOR_IGUAL (295)
+    MENOR_IGUAL (296)
+    READ (297)
+    WRITE (298)
+    FALSE (299)
+    TRUE (300)
+    INTEGER (301)
+    DIV (302)
+    NUMERO (303)
 
 
 Nonterminals, with rules where they appear
 
-    $accept (15)
+    $accept (49)
         on left: 0
-    programa (16)
+    programa (50)
         on left: 2
         on right: 0
-    $@1 (17)
+    $@1 (51)
         on left: 1
         on right: 2
-    bloco (18)
+    bloco (52)
         on left: 4
         on right: 2
-    $@2 (19)
+    $@2 (53)
         on left: 3
         on right: 4
-    parte_declara_vars (20)
+    parte_declara_vars (54)
         on left: 5
         on right: 4
-    var (21)
+    var (55)
         on left: 7 8
         on right: 5
-    $@3 (22)
+    $@3 (56)
         on left: 6
         on right: 7
-    declara_vars (23)
+    declara_vars (57)
         on left: 9 10
         on right: 7 9
-    declara_var (24)
+    declara_var (58)
         on left: 13
         on right: 9 10
-    $@4 (25)
+    $@4 (59)
         on left: 11
         on right: 13
-    $@5 (26)
+    $@5 (60)
         on left: 12
         on right: 13
-    tipo (27)
+    tipo (61)
         on left: 14
         on right: 13
-    lista_id_var (28)
+    lista_id_var (62)
         on left: 15 16
         on right: 13 15
-    lista_idents (29)
+    lista_idents (63)
         on left: 17 18
         on right: 2 17
-    comando_composto (30)
+    comando_composto (64)
         on left: 19
         on right: 4
-    comandos (31)
+    comandos (65)
         on left: 20
         on right: 19
 
