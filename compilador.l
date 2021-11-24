@@ -22,7 +22,7 @@
 #include "compilador.tab.h"
 
 //#define IMPRIME(STR) {};
-#define IMPRIME(STR) printf("%s    # %s \n", STR, token);
+#define IMPRIME(STR) printf("%s\t# %s \n", STR, token);
 
 int nl = 1;
 
@@ -229,13 +229,6 @@ do {
   return MULTIPLICACAO;
 }
 
-bool { 
-  simbolo = simb_bool;
-  strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME(" bool ");
-  return BOOL;
-}
-
 or { 
   simbolo = simb_or;
   strncpy (token, yytext, TAM_TOKEN);
@@ -341,12 +334,6 @@ true {
   return TRUE;
 }
 
-integer { 
-  simbolo = simb_integer;
-  strncpy (token, yytext, TAM_TOKEN);
-  IMPRIME(" integer ");
-  return INTEGER;
-}
 
 div {
   simbolo = simb_div;

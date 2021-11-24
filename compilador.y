@@ -22,62 +22,74 @@ int num_vars;
 %token MULTIPLICACAO BOOL OR AND NOT ABRE_COLCHETES
 %token FECHA_COLCHETES IGUAL MENOR MAIOR DIFERENTE
 %token MAIOR_IGUAL MENOR_IGUAL READ WRITE FALSE
-%token TRUE INTEGER DIV NUMERO IDENT
+%token TRUE INTEGER DIV NUMERO
 
 %%
 
-programa    :{
-             geraCodigo (NULL, "INPP");
-             }
-             PROGRAM IDENT
-             ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
-             bloco PONTO {
-             geraCodigo (NULL, "PARA");
-             }
+programa: 
+   {
+      geraCodigo (NULL, "INPP");
+   }
+   PROGRAM IDENT
+   ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
+   bloco PONTO 
+   {
+      geraCodigo (NULL, "PARA");
+   };
+
+bloco:
+   parte_declara_vars
+   { }
+   comando_composto;
+
+
+
+
+parte_declara_vars: var;
+
+
+var: 
+   {
+      num_vars = 0; 
+   } 
+   VAR declara_vars | ;
+
+declara_vars: 
+   declara_vars declara_var | 
+   declara_var;
+
+declara_var: 
+   { 
+
+   }
+   lista_id_var DOIS_PONTOS
+   tipo
+   {
+      num_vars = 10;
+      char num_vars_str[10];
+      sprintf(num_vars_str, "AMEM %d", num_vars);
+      geraCodigo(NULL, num_vars_str);
+   }
+   PONTO_E_VIRGULA;
+
+tipo: 
+   IDENT;
+
+lista_id_var: 
+   lista_id_var VIRGULA IDENT
+   { 
+      num_vars++; 
+      /* insere �ltima vars na tabela de s�mbolos */ 
+   } | 
+   IDENT 
+   { 
+      num_vars++;/* insere vars na tabela de s�mbolos */
+   }
 ;
 
-bloco       :
-              parte_declara_vars
-              {
-              }
-
-              comando_composto
-              ;
-
-
-
-
-parte_declara_vars:  var
-;
-
-
-var         : { } VAR declara_vars
-            |
-;
-
-declara_vars: declara_vars declara_var
-            | declara_var
-;
-
-declara_var : { }
-              lista_id_var DOIS_PONTOS
-              tipo
-              { /* AMEM */
-              }
-              PONTO_E_VIRGULA
-;
-
-tipo        : IDENT
-;
-
-lista_id_var: lista_id_var VIRGULA IDENT
-              { /* insere �ltima vars na tabela de s�mbolos */ }
-            | IDENT { /* insere vars na tabela de s�mbolos */}
-;
-
-lista_idents: lista_idents VIRGULA IDENT
-            | IDENT
-;
+lista_idents: 
+   lista_idents VIRGULA IDENT | 
+   IDENT;
 
 
 comando_composto: T_BEGIN comandos T_END
