@@ -65,7 +65,7 @@ declara_var:
    lista_id_var DOIS_PONTOS
    tipo
    {
-      num_vars = 10;
+      num_vars = 0;
       char num_vars_str[10];
       sprintf(num_vars_str, "AMEM %d", num_vars);
       geraCodigo(NULL, num_vars_str);
@@ -93,7 +93,7 @@ lista_idents:
 
 
 comando_composto: T_BEGIN comandos T_END
- 
+
 comandos:
 ;
 
