@@ -1,9 +1,9 @@
 enum tipos_dados{
-    INTEGER, BOOLEAN
+    INTEGER, BOOLEAN, UNDEFINED
 };
 
-enum tipos_variavel {
-    VARIAVEL_SIMPLES, VARIAVEL_COMPOSTA
+enum tipos_categoria {
+    VARIAVEL_SIMPLES, PARAMETRO_FORMAL, PROCEDIMENTO, FUNCAO, ROTULOS
 };
 
 

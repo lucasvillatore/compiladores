@@ -36,7 +36,7 @@ simbolo_t *pop(tabela_simbolos_t *tabela)
     return simbolo;
 }
 
-simbolo_t *cria_simbolo(char *nome, int categoria, int nivel_lexico, int tipo, int deslocamento) 
+simbolo_t *cria_simbolo(char *nome, int categoria, int nivel_lexico, int deslocamento, int tipo) 
 {
     simbolo_t *simbolo = (simbolo_t *)malloc(sizeof(simbolo_t));
     simbolo->nome = (char *)malloc(sizeof(50) * sizeof(char));
@@ -50,6 +50,18 @@ simbolo_t *cria_simbolo(char *nome, int categoria, int nivel_lexico, int tipo, i
     return simbolo;
 }
 
+simbolo_t *busca(tabela_simbolos_t *tabela, char *nome)
+{
+    // busca do ultimo para o primeiro (dito na aula 5)
+    for (int i = tabela->topo; i < 0; i--) {
+        if (!strcmp(nome, tabela->simbolos[i]->nome)) {
+            return tabela->simbolos[i];
+        }
+    }
+
+    return NULL;
+}
+
 void mostra_quantidade(tabela_simbolos_t *tabela)
 {
     printf("%d\n", tabela->topo + 1);
@@ -59,8 +71,21 @@ int main()
 {
     tabela_simbolos_t *tabela = aloca_tabela_simbolos();
 
-    simbolo_t *simbolo = cria_simbolo("teste", 0, 0, 0, 0);
+    simbolo_t *simbolo = cria_simbolo("teste", VARIAVEL_SIMPLES, 0, 0, UNDEFINED);
+    push(simbolo, tabela);
+    simbolo = cria_simbolo("teste2", VARIAVEL_SIMPLES, 0, 1, UNDEFINED);
+    push(simbolo, tabela);
+    simbolo = cria_simbolo("teste3", VARIAVEL_SIMPLES, 0, 2, UNDEFINED);
+    push(simbolo, tabela);
+    simbolo = cria_simbolo("teste4", VARIAVEL_SIMPLES, 0, 3, UNDEFINED);
     push(simbolo, tabela);
 
+    simbolo = busca(tabela, "teste5");
+
+    if (simbolo) {
+        printf("%s\n", simbolo->nome);
+    }else {
+        printf("Não encontrado\n");
+    }
     mostra_quantidade(tabela);
 }
