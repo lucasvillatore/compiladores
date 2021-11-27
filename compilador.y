@@ -93,7 +93,7 @@ lista_idents:
 
 
 comando_composto: T_BEGIN comandos T_END
-
+ 
 comandos:
 ;
 
