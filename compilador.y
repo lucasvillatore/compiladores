@@ -34,6 +34,7 @@ programa:
    ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
    bloco PONTO 
    {
+      finalizaCompilador() // To do - implementar essa função
       geraCodigo (NULL, "PARA");
    };
 
