@@ -10,6 +10,8 @@ tabela_simbolos_t *aloca_tabela_simbolos()
     tabela->topo = -1;
     tabela->tamanho_maximo = 50;
     tabela->simbolos = (simbolo_t **)malloc(sizeof(simbolo_t) * tabela->tamanho_maximo);
+
+    return tabela;
 }
 
 void push(simbolo_t *simbolo, tabela_simbolos_t *tabela)
