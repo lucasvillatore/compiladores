@@ -34,7 +34,7 @@ programa:
    ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
    bloco PONTO 
    {
-      finalizaCompilador() // To do - implementar essa função
+      //finalizaCompilador(); // To do - implementar essa função
       geraCodigo (NULL, "PARA");
    };
 
@@ -43,11 +43,7 @@ bloco:
    { }
    comando_composto;
 
-
-
-
 parte_declara_vars: var;
-
 
 var: 
    {
@@ -56,8 +52,9 @@ var:
    VAR declara_vars | ;
 
 declara_vars: 
-   declara_vars declara_var | 
-   declara_var;
+   declara_vars declara_var {num_vars=0; } | 
+   declara_var {num_vars=0; } 
+;
 
 declara_var: 
    { 
@@ -66,36 +63,114 @@ declara_var:
    lista_id_var DOIS_PONTOS
    tipo
    {
-      num_vars = 0;
       char num_vars_str[10];
       sprintf(num_vars_str, "AMEM %d", num_vars);
       geraCodigo(NULL, num_vars_str);
    }
-   PONTO_E_VIRGULA;
+   PONTO_E_VIRGULA
+;
 
 tipo: 
-   IDENT;
+   INTEGER |
+   BOOL |
+   IDENT
+;
 
 lista_id_var: 
    lista_id_var VIRGULA IDENT
-   { 
-      num_vars++; 
+   {
+      num_vars++;
       /* insere �ltima vars na tabela de s�mbolos */ 
    } | 
    IDENT 
    { 
-      num_vars++;/* insere vars na tabela de s�mbolos */
+      num_vars++;
+      /* insere vars na tabela de s�mbolos */
    }
 ;
 
 lista_idents: 
    lista_idents VIRGULA IDENT | 
-   IDENT;
+   IDENT
+;
 
+comando_composto: T_BEGIN comandos T_END | T_BEGIN T_END;
 
-comando_composto: T_BEGIN comandos T_END
+comandos: 
+   comando PONTO_E_VIRGULA comandos |
+   comando PONTO_E_VIRGULA 
 
-comandos:
+comando:
+   comando_sem_rotulo 
+;
+
+comando_sem_rotulo: 
+    atribuicao
+;
+
+atribuicao:
+   variavel_chamada_funcao ATRIBUICAO expressao
+;
+
+expressao: 
+   expressao_simples |
+   expressao_simples relacao expressao_simples;
+
+relacao:
+   IGUAL | DIFERENTE | MENOR | MENOR_IGUAL | MAIOR_IGUAL | MAIOR ;
+
+termo_com_sinal: 
+   MAIS termo |
+   MENOS termo |
+   termo
+;
+
+lista_expressoes:
+   expressao VIRGULA lista_expressoes |
+   expressao
+;
+
+expressao_simples:
+   termo_com_sinal operacoes |
+   termo_com_sinal
+;
+
+operacoes:
+   operacao operacoes |
+   operacao
+;
+
+operacao:
+   MAIS termo |
+   MENOS termo |
+   OR termo 
+;
+
+termo:
+   fator MULTIPLICACAO fator |
+   fator DIV fator |
+   fator AND fator |
+   fator
+;
+
+fator:
+   NUMERO |
+   variavel_chamada_funcao |
+   ABRE_PARENTESES expressao FECHA_PARENTESES |
+   NOT fator
+;
+
+variavel_chamada_funcao:
+   IDENT variavel |
+   IDENT chamada_funcao
+;
+
+variavel:
+   lista_expressoes | 
+;
+
+chamada_funcao:
+   ABRE_PARENTESES lista_expressoes FECHA_PARENTESES
 ;
 
 
