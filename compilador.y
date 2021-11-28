@@ -130,19 +130,33 @@ comando:
 ;
 
 comando_sem_rotulo: 
-    atribuicao
+   atribuicao
 ;
 
 atribuicao:
-   variavel_chamada_funcao ATRIBUICAO expressao
+   variavel ATRIBUICAO expressao
+;
+
+variavel:
+   IDENT 
+   {
+
+   } 
 ;
 
 expressao: 
    expressao_simples |
-   expressao_simples relacao expressao_simples;
+   expressao_simples relacao expressao_simples
+;
+
+expressao_simples:
+   termo_com_sinal operacoes |
+   termo_com_sinal
+;
 
 relacao:
-   IGUAL | DIFERENTE | MENOR | MENOR_IGUAL | MAIOR_IGUAL | MAIOR ;
+   IGUAL | DIFERENTE | MENOR | MENOR_IGUAL | MAIOR_IGUAL | MAIOR 
+;
 
 termo_com_sinal: 
    MAIS termo |
@@ -150,14 +164,16 @@ termo_com_sinal:
    termo
 ;
 
-lista_expressoes:
-   expressao VIRGULA lista_expressoes |
-   expressao
+termo:
+   fator operacoes_fator |
+   fator
 ;
 
-expressao_simples:
-   termo_com_sinal operacoes |
-   termo_com_sinal
+fator:
+   variavel |
+   NUMERO |
+   ABRE_PARENTESES expressao FECHA_PARENTESES |
+   NOT fator
 ;
 
 operacoes:
@@ -182,30 +198,9 @@ operacao_fator:
    AND fator 
 ;
 
-termo:
-   fator operacoes_fator |
-   fator
-;
 
-fator:
-   variavel_chamada_funcao |
-   NUMERO |
-   ABRE_PARENTESES expressao FECHA_PARENTESES |
-   NOT fator
-;
 
-variavel_chamada_funcao:
-   IDENT variavel |
-   IDENT chamada_funcao
-;
 
-variavel:
-   lista_expressoes | 
-;
-
-chamada_funcao:
-   ABRE_PARENTESES lista_expressoes FECHA_PARENTESES
-;
 
 
 %%
