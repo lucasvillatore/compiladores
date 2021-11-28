@@ -99,6 +99,7 @@ comando_composto: T_BEGIN comandos T_END | T_BEGIN T_END;
 comandos: 
    comando PONTO_E_VIRGULA comandos |
    comando PONTO_E_VIRGULA 
+;
 
 comando:
    comando_sem_rotulo 
@@ -143,19 +144,28 @@ operacoes:
 operacao:
    MAIS termo |
    MENOS termo |
-   OR termo 
+   OR termo  
+;
+
+operacoes_fator:
+   operacao_fator operacoes_fator |
+   operacao_fator
+;
+
+operacao_fator:
+   MULTIPLICACAO fator |
+   DIV fator |
+   AND fator 
 ;
 
 termo:
-   fator MULTIPLICACAO fator |
-   fator DIV fator |
-   fator AND fator |
+   fator operacoes_fator |
    fator
 ;
 
 fator:
-   NUMERO |
    variavel_chamada_funcao |
+   NUMERO |
    ABRE_PARENTESES expressao FECHA_PARENTESES |
    NOT fator
 ;
