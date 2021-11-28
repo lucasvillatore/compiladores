@@ -9,8 +9,18 @@
 #include <stdlib.h>
 #include <string.h>
 #include "compilador.h"
+#include "pilha.c"
+#include "comandos.c"
+
+tabela_simbolos_t *tabela_simbolos;
 
 int num_vars;
+int dmem;
+int nivel_lexico;
+int deslocamento;
+int deslocamento_anterior;
+int tipo_variavel;
+simbolo_t *novo_simbolo;
 
 %}
 
@@ -34,7 +44,8 @@ programa:
    ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
    bloco PONTO 
    {
-      //finalizaCompilador(); // To do - implementar essa função
+      mostra_tabela_simbolos(tabela_simbolos);
+      adicionaCodigoDMEM(dmem);
       geraCodigo (NULL, "PARA");
    };
 
@@ -46,9 +57,6 @@ bloco:
 parte_declara_vars: var;
 
 var: 
-   {
-      num_vars = 0; 
-   } 
    VAR declara_vars | ;
 
 declara_vars: 
@@ -63,29 +71,45 @@ declara_var:
    lista_id_var DOIS_PONTOS
    tipo
    {
-      char num_vars_str[10];
-      sprintf(num_vars_str, "AMEM %d", num_vars);
-      geraCodigo(NULL, num_vars_str);
+      atualiza_tipo_variaveis_tabela_simbolos(tabela_simbolos, tipo_variavel, num_vars);
+      adicionaCodigoAMEM(num_vars);
    }
    PONTO_E_VIRGULA
 ;
 
 tipo: 
-   INTEGER |
-   BOOL |
-   IDENT
+   INTEGER 
+   { tipo_variavel = TIPO_INTEGER; } |
+   BOOL { tipo_variavel = TIPO_BOOLEAN; }
 ;
 
 lista_id_var: 
    lista_id_var VIRGULA IDENT
    {
+      if (busca_simbolo(tabela_simbolos, token, nivel_lexico)) {
+         imprimeErro("Simbolo já existente na tabela de simbolos");
+      }
+
       num_vars++;
-      /* insere �ltima vars na tabela de s�mbolos */ 
-   } | 
-   IDENT 
+      dmem++;
+
+      deslocamento++;
+      novo_simbolo = cria_simbolo(token, VARIAVEL_SIMPLES, nivel_lexico, deslocamento, TIPO_UNDEFINED);
+      adiciona_simbolo_tabela_simbolos(novo_simbolo, tabela_simbolos);
+   } 
+   | IDENT 
    { 
+
+      if (busca_simbolo(tabela_simbolos, token, nivel_lexico)) {
+         imprimeErro("Simbolo já existente na tabela de simbolos");
+      }
+
       num_vars++;
-      /* insere vars na tabela de s�mbolos */
+      dmem++;
+
+      deslocamento++;
+      novo_simbolo = cria_simbolo(token, VARIAVEL_SIMPLES, nivel_lexico, deslocamento, TIPO_UNDEFINED);
+      adiciona_simbolo_tabela_simbolos(novo_simbolo, tabela_simbolos);
    }
 ;
 
@@ -205,7 +229,11 @@ int main (int argc, char** argv) {
 /* -------------------------------------------------------------------
  *  Inicia a Tabela de S�mbolos
  * ------------------------------------------------------------------- */
-
+   tabela_simbolos = aloca_tabela_simbolos();
+   dmem = 0;
+   num_vars = 0;
+   deslocamento = 0;
+   nivel_lexico = 0;
    yyin=fp;
    yyparse();
 
