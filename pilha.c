@@ -109,7 +109,7 @@ void mostra_simbolo(simbolo_t *simbolo)
 void mostra_tabela_simbolos(tabela_simbolos_t *tabela)
 {
     for (int i = 0; i <= tabela->topo; i++) {
-        mostra_simbolo(tabela->simbolos[i]);
+        //mostra_simbolo(tabela->simbolos[i]);
     }
 }
 

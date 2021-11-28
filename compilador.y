@@ -10,6 +10,7 @@
 #include <string.h>
 #include "compilador.h"
 #include "pilha.c"
+#include "pilha-gen.c"
 #include "comandos.c"
 
 tabela_simbolos_t *tabela_simbolos;
@@ -20,8 +21,16 @@ int nivel_lexico;
 int deslocamento;
 int deslocamento_anterior;
 int tipo_variavel;
+int tipo_variavel_atribuicao;
+int tipo_operacao;
 simbolo_t *novo_simbolo;
 simbolo_t *variavel;
+
+pilha_t *pilhaExpr;
+pilha_t *pilhaTermo;
+pilha_t *pilhaFator;
+
+void verificaTipos(pilha_t *p1, pilha_t *p2, int tipoComparacao);
 
 %}
 
@@ -135,29 +144,44 @@ comando_sem_rotulo:
 ;
 
 atribuicao:
-   variavel ATRIBUICAO expressao
+   variavel_atribuicao ATRIBUICAO expressao
+   { 
+      //printf("%d %d\n", tipo_variavel, remove_pilha(pilhaExpr));
+      if (tipo_variavel_atribuicao != remove_pilha(pilhaExpr))
+         imprimeErro("Atribuicao com tipo de variavel invalido");
+   }
+;
+
+variavel_atribuicao:
+   IDENT 
+   {
+      variavel = busca_simbolo(tabela_simbolos, token, nivel_lexico);
+      tipo_variavel_atribuicao = variavel->tipo;
+      if (!variavel) {
+         imprimeErro("Variavel não encontrada");
+      }
+   } 
 ;
 
 variavel:
    IDENT 
    {
-      variavel = busca_simbolo(tabela_simbolos, token, nivel_lexico)
+      variavel = busca_simbolo(tabela_simbolos, token, nivel_lexico);
+      tipo_variavel = variavel->tipo;
       if (!variavel) {
          imprimeErro("Variavel não encontrada");
       }
-
-   
    } 
 ;
 
 expressao: 
-   expressao_simples |
-   expressao_simples relacao expressao_simples
+   expressao relacao expressao_simples {verificaTipos(pilhaExpr, pilhaExpr, TIPO_BOOLEAN);}|
+   expressao_simples
 ;
 
 expressao_simples:
-   termo_com_sinal operacoes |
-   termo_com_sinal
+   expressao_simples operacao termo {verificaTipos(pilhaExpr, pilhaTermo, tipo_operacao);} |
+   termo_com_sinal {insere_pilha(pilhaExpr, remove_pilha(pilhaTermo));}
 ;
 
 relacao:
@@ -171,45 +195,40 @@ termo_com_sinal:
 ;
 
 termo:
-   fator operacoes_fator |
-   fator
+   termo operacao_fator fator { verificaTipos(pilhaTermo, pilhaFator, tipo_operacao); } |
+   fator {insere_pilha(pilhaTermo, remove_pilha(pilhaFator));}
 ;
 
 fator:
-   variavel |
+   variavel {insere_pilha(pilhaFator, tipo_variavel);}|
    NUMERO |
    ABRE_PARENTESES expressao FECHA_PARENTESES |
    NOT fator
 ;
 
-operacoes:
-   operacao operacoes |
-   operacao
-;
-
 operacao:
-   MAIS termo |
-   MENOS termo |
-   OR termo  
+   MAIS {tipo_operacao = TIPO_INTEGER;}|
+   MENOS {tipo_operacao = TIPO_INTEGER;}|
+   OR   {tipo_operacao = TIPO_BOOLEAN;}
 ;
 
-operacoes_fator:
-   operacao_fator operacoes_fator |
-   operacao_fator
-;
 
 operacao_fator:
-   MULTIPLICACAO fator |
-   DIV fator |
-   AND fator 
+   MULTIPLICACAO {tipo_operacao = TIPO_INTEGER;}|
+   DIV {tipo_operacao = TIPO_INTEGER;}|
+   AND  {tipo_operacao = TIPO_BOOLEAN;}
 ;
 
-
-
-
-
-
 %%
+
+void verificaTipos(pilha_t *p1, pilha_t *p2, int tipoComparacao){
+   int t1 = remove_pilha(p1), t2 = remove_pilha(p2);
+
+   if (t1 != t2)
+      imprimeErro("Tipos diferentes na operação");
+
+   insere_pilha(p1, tipoComparacao);
+}
 
 int main (int argc, char** argv) {
    FILE* fp;
@@ -226,6 +245,10 @@ int main (int argc, char** argv) {
       return(-1);
    }
 
+   
+   pilhaExpr = cria_pilha();
+   pilhaTermo = cria_pilha();
+   pilhaFator = cria_pilha();
 
 /* -------------------------------------------------------------------
  *  Inicia a Tabela de S�mbolos
