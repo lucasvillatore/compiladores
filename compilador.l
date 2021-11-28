@@ -342,6 +342,20 @@ div {
   return DIV;
 }
 
+integer { 
+  simbolo  = simb_integer;
+  strncpy (token, yytext, TAM_TOKEN);
+  IMPRIME(" integer ");
+  return INTEGER;
+}
+
+boolean { 
+  simbolo = simb_boolean;
+  strncpy (token, yytext, TAM_TOKEN);
+  IMPRIME(" boolean ");
+  return BOOLEAN;
+}
+
 {numero} {
   simbolo = simb_numero;
   strncpy (token, yytext, TAM_TOKEN);

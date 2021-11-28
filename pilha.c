@@ -103,6 +103,7 @@ void mostra_simbolo(simbolo_t *simbolo)
     printf("categoria: %d\n", simbolo->categoria);
     printf("nivel_lexico: %d\n", simbolo->nivel_lexico);
     printf("deslocamento: %d\n", simbolo->deslocamento);
+    printf("tipo: %d\n", simbolo->tipo);
 }
 
 void mostra_tabela_simbolos(tabela_simbolos_t *tabela)
@@ -115,7 +116,7 @@ void mostra_tabela_simbolos(tabela_simbolos_t *tabela)
 void atualiza_tipo_variaveis_tabela_simbolos(tabela_simbolos_t *tabela, int tipo_variavel, int num_vars)
 {
 
-    for (int i = tabela->topo; i >= tabela->topo - num_vars; i--) {
+    for (int i = tabela->topo; i > tabela->topo - num_vars; i--) {
         tabela->simbolos[i]->tipo = tipo_variavel;
     }
 
