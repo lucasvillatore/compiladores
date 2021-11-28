@@ -112,6 +112,15 @@ void mostra_tabela_simbolos(tabela_simbolos_t *tabela)
     }
 }
 
+void atualiza_tipo_variaveis_tabela_simbolos(tabela_simbolos_t *tabela, int tipo_variavel, int num_vars)
+{
+
+    for (int i = tabela->topo; i >= tabela->topo - num_vars; i--) {
+        tabela->simbolos[i]->tipo = tipo_variavel;
+    }
+
+}
+
 // int main()
 // {
 //     tabela_simbolos_t *tabela = aloca_tabela_simbolos();

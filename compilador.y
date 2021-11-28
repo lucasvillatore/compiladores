@@ -19,7 +19,7 @@ int dmem;
 int nivel_lexico;
 int deslocamento;
 int deslocamento_anterior;
-
+int tipo_variavel;
 simbolo_t *novo_simbolo;
 
 %}
@@ -71,15 +71,16 @@ declara_var:
    lista_id_var DOIS_PONTOS
    tipo
    {
+      atualiza_tipo_variaveis_tabela_simbolos(tabela_simbolos, tipo_variavel, num_vars);
       adicionaCodigoAMEM(num_vars);
    }
    PONTO_E_VIRGULA
 ;
 
 tipo: 
-   INTEGER |
-   BOOL |
-   IDENT
+   INTEGER 
+   { tipo_variavel = TIPO_INTEGER; } |
+   BOOL { tipo_variavel = TIPO_BOOLEAN; }
 ;
 
 lista_id_var: 
