@@ -21,6 +21,7 @@ int deslocamento;
 int deslocamento_anterior;
 int tipo_variavel;
 simbolo_t *novo_simbolo;
+simbolo_t *variavel;
 
 %}
 
@@ -140,7 +141,12 @@ atribuicao:
 variavel:
    IDENT 
    {
+      variavel = busca_simbolo(tabela_simbolos, token, nivel_lexico)
+      if (!variavel) {
+         imprimeErro("Variavel não encontrada");
+      }
 
+   
    } 
 ;
 
