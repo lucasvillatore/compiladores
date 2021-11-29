@@ -195,7 +195,7 @@ boolean:
    | FALSE
    {
       tipo_variavel = TIPO_BOOLEAN;
-      adicionaCodigoCarregaConstante("2");
+      adicionaCodigoCarregaConstante("0");
    }
 ;
 expressao: 
