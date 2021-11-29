@@ -171,7 +171,16 @@ variavel:
       if (!variavel) {
          imprimeErro("Variavel não encontrada");
       }
-   } 
+
+      printf("variavel = %s\n", token);
+   }
+;
+
+numero:
+   NUMERO
+   {
+      tipo_variavel = TIPO_INTEGER;
+   }
 ;
 
 expressao: 
@@ -200,8 +209,8 @@ termo:
 ;
 
 fator:
-   variavel {insere_pilha(pilhaFator, tipo_variavel);}|
-   NUMERO |
+   variavel {insere_pilha(pilhaFator, tipo_variavel);} |
+   numero {insere_pilha(pilhaFator, tipo_variavel); } |
    ABRE_PARENTESES expressao FECHA_PARENTESES |
    NOT fator
 ;

@@ -71,38 +71,40 @@ Grammar
 
    27 variavel: IDENT
 
-   28 expressao: expressao relacao expressao_simples
-   29          | expressao_simples
+   28 numero: NUMERO
 
-   30 expressao_simples: expressao_simples operacao termo
-   31                  | termo_com_sinal
+   29 expressao: expressao relacao expressao_simples
+   30          | expressao_simples
 
-   32 relacao: IGUAL
-   33        | DIFERENTE
-   34        | MENOR
-   35        | MENOR_IGUAL
-   36        | MAIOR_IGUAL
-   37        | MAIOR
+   31 expressao_simples: expressao_simples operacao termo
+   32                  | termo_com_sinal
 
-   38 termo_com_sinal: MAIS termo
-   39                | MENOS termo
-   40                | termo
+   33 relacao: IGUAL
+   34        | DIFERENTE
+   35        | MENOR
+   36        | MENOR_IGUAL
+   37        | MAIOR_IGUAL
+   38        | MAIOR
 
-   41 termo: termo operacao_fator fator
-   42      | fator
+   39 termo_com_sinal: MAIS termo
+   40                | MENOS termo
+   41                | termo
 
-   43 fator: variavel
-   44      | NUMERO
-   45      | ABRE_PARENTESES expressao FECHA_PARENTESES
-   46      | NOT fator
+   42 termo: termo operacao_fator fator
+   43      | fator
 
-   47 operacao: MAIS
-   48         | MENOS
-   49         | OR
+   44 fator: variavel
+   45      | numero
+   46      | ABRE_PARENTESES expressao FECHA_PARENTESES
+   47      | NOT fator
 
-   50 operacao_fator: MULTIPLICACAO
-   51               | DIV
-   52               | AND
+   48 operacao: MAIS
+   49         | MENOS
+   50         | OR
+
+   51 operacao_fator: MULTIPLICACAO
+   52               | DIV
+   53               | AND
 
 
 Terminals, with rules where they appear
@@ -110,8 +112,8 @@ Terminals, with rules where they appear
     $end (0) 0
     error (256)
     PROGRAM (258) 2
-    ABRE_PARENTESES (259) 2 45
-    FECHA_PARENTESES (260) 2 45
+    ABRE_PARENTESES (259) 2 46
+    FECHA_PARENTESES (260) 2 46
     VIRGULA (261) 15 17
     PONTO_E_VIRGULA (262) 2 12 21 22
     DOIS_PONTOS (263) 12
@@ -133,27 +135,27 @@ Terminals, with rules where they appear
     ELSE (279)
     WHILE (280)
     DO (281)
-    MAIS (282) 38 47
-    MENOS (283) 39 48
-    MULTIPLICACAO (284) 50
-    OR (285) 49
-    AND (286) 52
-    NOT (287) 46
+    MAIS (282) 39 48
+    MENOS (283) 40 49
+    MULTIPLICACAO (284) 51
+    OR (285) 50
+    AND (286) 53
+    NOT (287) 47
     ABRE_COLCHETES (288)
     FECHA_COLCHETES (289)
-    IGUAL (290) 32
-    MENOR (291) 34
-    MAIOR (292) 37
-    DIFERENTE (293) 33
-    MAIOR_IGUAL (294) 36
-    MENOR_IGUAL (295) 35
+    IGUAL (290) 33
+    MENOR (291) 35
+    MAIOR (292) 38
+    DIFERENTE (293) 34
+    MAIOR_IGUAL (294) 37
+    MENOR_IGUAL (295) 36
     READ (296)
     WRITE (297)
     FALSE (298)
     TRUE (299)
     INTEGER (300) 13
-    DIV (301) 51
-    NUMERO (302) 44
+    DIV (301) 52
+    NUMERO (302) 28
     BOOLEAN (303) 14
 
 
@@ -220,31 +222,34 @@ Nonterminals, with rules where they appear
         on right: 25
     variavel (69)
         on left: 27
-        on right: 43
-    expressao (70)
-        on left: 28 29
-        on right: 25 28 45
-    expressao_simples (71)
-        on left: 30 31
-        on right: 28 29 30
-    relacao (72)
-        on left: 32 33 34 35 36 37
-        on right: 28
-    termo_com_sinal (73)
-        on left: 38 39 40
+        on right: 44
+    numero (70)
+        on left: 28
+        on right: 45
+    expressao (71)
+        on left: 29 30
+        on right: 25 29 46
+    expressao_simples (72)
+        on left: 31 32
+        on right: 29 30 31
+    relacao (73)
+        on left: 33 34 35 36 37 38
+        on right: 29
+    termo_com_sinal (74)
+        on left: 39 40 41
+        on right: 32
+    termo (75)
+        on left: 42 43
+        on right: 31 39 40 41 42
+    fator (76)
+        on left: 44 45 46 47
+        on right: 42 43 47
+    operacao (77)
+        on left: 48 49 50
         on right: 31
-    termo (74)
-        on left: 41 42
-        on right: 30 38 39 40 41
-    fator (75)
-        on left: 43 44 45 46
-        on right: 41 42 46
-    operacao (76)
-        on left: 47 48 49
-        on right: 30
-    operacao_fator (77)
-        on left: 50 51 52
-        on right: 41
+    operacao_fator (78)
+        on left: 51 52 53
+        on right: 42
 
 
 State 0
@@ -606,18 +611,19 @@ State 42
     NUMERO           shift, and go to state 50
 
     variavel           go to state 51
-    expressao          go to state 52
-    expressao_simples  go to state 53
-    termo_com_sinal    go to state 54
-    termo              go to state 55
-    fator              go to state 56
+    numero             go to state 52
+    expressao          go to state 53
+    expressao_simples  go to state 54
+    termo_com_sinal    go to state 55
+    termo              go to state 56
+    fator              go to state 57
 
 
 State 43
 
    12 declara_var: $@3 lista_id_var DOIS_PONTOS tipo $@4 . PONTO_E_VIRGULA
 
-    PONTO_E_VIRGULA  shift, and go to state 57
+    PONTO_E_VIRGULA  shift, and go to state 58
 
 
 State 44
@@ -629,7 +635,7 @@ State 44
 
 State 45
 
-   45 fator: ABRE_PARENTESES . expressao FECHA_PARENTESES
+   46 fator: ABRE_PARENTESES . expressao FECHA_PARENTESES
 
     ABRE_PARENTESES  shift, and go to state 45
     IDENT            shift, and go to state 46
@@ -639,11 +645,12 @@ State 45
     NUMERO           shift, and go to state 50
 
     variavel           go to state 51
-    expressao          go to state 58
-    expressao_simples  go to state 53
-    termo_com_sinal    go to state 54
-    termo              go to state 55
-    fator              go to state 56
+    numero             go to state 52
+    expressao          go to state 59
+    expressao_simples  go to state 54
+    termo_com_sinal    go to state 55
+    termo              go to state 56
+    fator              go to state 57
 
 
 State 46
@@ -655,7 +662,7 @@ State 46
 
 State 47
 
-   38 termo_com_sinal: MAIS . termo
+   39 termo_com_sinal: MAIS . termo
 
     ABRE_PARENTESES  shift, and go to state 45
     IDENT            shift, and go to state 46
@@ -663,13 +670,14 @@ State 47
     NUMERO           shift, and go to state 50
 
     variavel  go to state 51
-    termo     go to state 59
-    fator     go to state 56
+    numero    go to state 52
+    termo     go to state 60
+    fator     go to state 57
 
 
 State 48
 
-   39 termo_com_sinal: MENOS . termo
+   40 termo_com_sinal: MENOS . termo
 
     ABRE_PARENTESES  shift, and go to state 45
     IDENT            shift, and go to state 46
@@ -677,13 +685,14 @@ State 48
     NUMERO           shift, and go to state 50
 
     variavel  go to state 51
-    termo     go to state 60
-    fator     go to state 56
+    numero    go to state 52
+    termo     go to state 61
+    fator     go to state 57
 
 
 State 49
 
-   46 fator: NOT . fator
+   47 fator: NOT . fator
 
     ABRE_PARENTESES  shift, and go to state 45
     IDENT            shift, and go to state 46
@@ -691,185 +700,193 @@ State 49
     NUMERO           shift, and go to state 50
 
     variavel  go to state 51
-    fator     go to state 61
+    numero    go to state 52
+    fator     go to state 62
 
 
 State 50
 
-   44 fator: NUMERO .
+   28 numero: NUMERO .
 
-    $default  reduce using rule 44 (fator)
+    $default  reduce using rule 28 (numero)
 
 
 State 51
 
-   43 fator: variavel .
+   44 fator: variavel .
 
-    $default  reduce using rule 43 (fator)
+    $default  reduce using rule 44 (fator)
 
 
 State 52
 
-   25 atribuicao: variavel_atribuicao ATRIBUICAO expressao .
-   28 expressao: expressao . relacao expressao_simples
+   45 fator: numero .
 
-    IGUAL        shift, and go to state 62
-    MENOR        shift, and go to state 63
-    MAIOR        shift, and go to state 64
-    DIFERENTE    shift, and go to state 65
-    MAIOR_IGUAL  shift, and go to state 66
-    MENOR_IGUAL  shift, and go to state 67
-
-    $default  reduce using rule 25 (atribuicao)
-
-    relacao  go to state 68
+    $default  reduce using rule 45 (fator)
 
 
 State 53
 
-   29 expressao: expressao_simples .
-   30 expressao_simples: expressao_simples . operacao termo
+   25 atribuicao: variavel_atribuicao ATRIBUICAO expressao .
+   29 expressao: expressao . relacao expressao_simples
 
-    MAIS   shift, and go to state 69
-    MENOS  shift, and go to state 70
-    OR     shift, and go to state 71
+    IGUAL        shift, and go to state 63
+    MENOR        shift, and go to state 64
+    MAIOR        shift, and go to state 65
+    DIFERENTE    shift, and go to state 66
+    MAIOR_IGUAL  shift, and go to state 67
+    MENOR_IGUAL  shift, and go to state 68
 
-    $default  reduce using rule 29 (expressao)
+    $default  reduce using rule 25 (atribuicao)
 
-    operacao  go to state 72
+    relacao  go to state 69
 
 
 State 54
 
-   31 expressao_simples: termo_com_sinal .
+   30 expressao: expressao_simples .
+   31 expressao_simples: expressao_simples . operacao termo
 
-    $default  reduce using rule 31 (expressao_simples)
+    MAIS   shift, and go to state 70
+    MENOS  shift, and go to state 71
+    OR     shift, and go to state 72
+
+    $default  reduce using rule 30 (expressao)
+
+    operacao  go to state 73
 
 
 State 55
 
-   40 termo_com_sinal: termo .
-   41 termo: termo . operacao_fator fator
+   32 expressao_simples: termo_com_sinal .
 
-    MULTIPLICACAO  shift, and go to state 73
-    AND            shift, and go to state 74
-    DIV            shift, and go to state 75
-
-    $default  reduce using rule 40 (termo_com_sinal)
-
-    operacao_fator  go to state 76
+    $default  reduce using rule 32 (expressao_simples)
 
 
 State 56
 
-   42 termo: fator .
+   41 termo_com_sinal: termo .
+   42 termo: termo . operacao_fator fator
 
-    $default  reduce using rule 42 (termo)
+    MULTIPLICACAO  shift, and go to state 74
+    AND            shift, and go to state 75
+    DIV            shift, and go to state 76
+
+    $default  reduce using rule 41 (termo_com_sinal)
+
+    operacao_fator  go to state 77
 
 
 State 57
+
+   43 termo: fator .
+
+    $default  reduce using rule 43 (termo)
+
+
+State 58
 
    12 declara_var: $@3 lista_id_var DOIS_PONTOS tipo $@4 PONTO_E_VIRGULA .
 
     $default  reduce using rule 12 (declara_var)
 
 
-State 58
-
-   28 expressao: expressao . relacao expressao_simples
-   45 fator: ABRE_PARENTESES expressao . FECHA_PARENTESES
-
-    FECHA_PARENTESES  shift, and go to state 77
-    IGUAL             shift, and go to state 62
-    MENOR             shift, and go to state 63
-    MAIOR             shift, and go to state 64
-    DIFERENTE         shift, and go to state 65
-    MAIOR_IGUAL       shift, and go to state 66
-    MENOR_IGUAL       shift, and go to state 67
-
-    relacao  go to state 68
-
-
 State 59
 
-   38 termo_com_sinal: MAIS termo .
-   41 termo: termo . operacao_fator fator
+   29 expressao: expressao . relacao expressao_simples
+   46 fator: ABRE_PARENTESES expressao . FECHA_PARENTESES
 
-    MULTIPLICACAO  shift, and go to state 73
-    AND            shift, and go to state 74
-    DIV            shift, and go to state 75
+    FECHA_PARENTESES  shift, and go to state 78
+    IGUAL             shift, and go to state 63
+    MENOR             shift, and go to state 64
+    MAIOR             shift, and go to state 65
+    DIFERENTE         shift, and go to state 66
+    MAIOR_IGUAL       shift, and go to state 67
+    MENOR_IGUAL       shift, and go to state 68
 
-    $default  reduce using rule 38 (termo_com_sinal)
-
-    operacao_fator  go to state 76
+    relacao  go to state 69
 
 
 State 60
 
-   39 termo_com_sinal: MENOS termo .
-   41 termo: termo . operacao_fator fator
+   39 termo_com_sinal: MAIS termo .
+   42 termo: termo . operacao_fator fator
 
-    MULTIPLICACAO  shift, and go to state 73
-    AND            shift, and go to state 74
-    DIV            shift, and go to state 75
+    MULTIPLICACAO  shift, and go to state 74
+    AND            shift, and go to state 75
+    DIV            shift, and go to state 76
 
     $default  reduce using rule 39 (termo_com_sinal)
 
-    operacao_fator  go to state 76
+    operacao_fator  go to state 77
 
 
 State 61
 
-   46 fator: NOT fator .
+   40 termo_com_sinal: MENOS termo .
+   42 termo: termo . operacao_fator fator
 
-    $default  reduce using rule 46 (fator)
+    MULTIPLICACAO  shift, and go to state 74
+    AND            shift, and go to state 75
+    DIV            shift, and go to state 76
+
+    $default  reduce using rule 40 (termo_com_sinal)
+
+    operacao_fator  go to state 77
 
 
 State 62
 
-   32 relacao: IGUAL .
+   47 fator: NOT fator .
 
-    $default  reduce using rule 32 (relacao)
+    $default  reduce using rule 47 (fator)
 
 
 State 63
 
-   34 relacao: MENOR .
-
-    $default  reduce using rule 34 (relacao)
-
-
-State 64
-
-   37 relacao: MAIOR .
-
-    $default  reduce using rule 37 (relacao)
-
-
-State 65
-
-   33 relacao: DIFERENTE .
+   33 relacao: IGUAL .
 
     $default  reduce using rule 33 (relacao)
 
 
-State 66
+State 64
 
-   36 relacao: MAIOR_IGUAL .
-
-    $default  reduce using rule 36 (relacao)
-
-
-State 67
-
-   35 relacao: MENOR_IGUAL .
+   35 relacao: MENOR .
 
     $default  reduce using rule 35 (relacao)
 
 
+State 65
+
+   38 relacao: MAIOR .
+
+    $default  reduce using rule 38 (relacao)
+
+
+State 66
+
+   34 relacao: DIFERENTE .
+
+    $default  reduce using rule 34 (relacao)
+
+
+State 67
+
+   37 relacao: MAIOR_IGUAL .
+
+    $default  reduce using rule 37 (relacao)
+
+
 State 68
 
-   28 expressao: expressao relacao . expressao_simples
+   36 relacao: MENOR_IGUAL .
+
+    $default  reduce using rule 36 (relacao)
+
+
+State 69
+
+   29 expressao: expressao relacao . expressao_simples
 
     ABRE_PARENTESES  shift, and go to state 45
     IDENT            shift, and go to state 46
@@ -879,71 +896,37 @@ State 68
     NUMERO           shift, and go to state 50
 
     variavel           go to state 51
-    expressao_simples  go to state 78
-    termo_com_sinal    go to state 54
-    termo              go to state 55
-    fator              go to state 56
-
-
-State 69
-
-   47 operacao: MAIS .
-
-    $default  reduce using rule 47 (operacao)
+    numero             go to state 52
+    expressao_simples  go to state 79
+    termo_com_sinal    go to state 55
+    termo              go to state 56
+    fator              go to state 57
 
 
 State 70
 
-   48 operacao: MENOS .
+   48 operacao: MAIS .
 
     $default  reduce using rule 48 (operacao)
 
 
 State 71
 
-   49 operacao: OR .
+   49 operacao: MENOS .
 
     $default  reduce using rule 49 (operacao)
 
 
 State 72
 
-   30 expressao_simples: expressao_simples operacao . termo
+   50 operacao: OR .
 
-    ABRE_PARENTESES  shift, and go to state 45
-    IDENT            shift, and go to state 46
-    NOT              shift, and go to state 49
-    NUMERO           shift, and go to state 50
-
-    variavel  go to state 51
-    termo     go to state 79
-    fator     go to state 56
+    $default  reduce using rule 50 (operacao)
 
 
 State 73
 
-   50 operacao_fator: MULTIPLICACAO .
-
-    $default  reduce using rule 50 (operacao_fator)
-
-
-State 74
-
-   52 operacao_fator: AND .
-
-    $default  reduce using rule 52 (operacao_fator)
-
-
-State 75
-
-   51 operacao_fator: DIV .
-
-    $default  reduce using rule 51 (operacao_fator)
-
-
-State 76
-
-   41 termo: termo operacao_fator . fator
+   31 expressao_simples: expressao_simples operacao . termo
 
     ABRE_PARENTESES  shift, and go to state 45
     IDENT            shift, and go to state 46
@@ -951,46 +934,83 @@ State 76
     NUMERO           shift, and go to state 50
 
     variavel  go to state 51
-    fator     go to state 80
+    numero    go to state 52
+    termo     go to state 80
+    fator     go to state 57
+
+
+State 74
+
+   51 operacao_fator: MULTIPLICACAO .
+
+    $default  reduce using rule 51 (operacao_fator)
+
+
+State 75
+
+   53 operacao_fator: AND .
+
+    $default  reduce using rule 53 (operacao_fator)
+
+
+State 76
+
+   52 operacao_fator: DIV .
+
+    $default  reduce using rule 52 (operacao_fator)
 
 
 State 77
 
-   45 fator: ABRE_PARENTESES expressao FECHA_PARENTESES .
+   42 termo: termo operacao_fator . fator
 
-    $default  reduce using rule 45 (fator)
+    ABRE_PARENTESES  shift, and go to state 45
+    IDENT            shift, and go to state 46
+    NOT              shift, and go to state 49
+    NUMERO           shift, and go to state 50
+
+    variavel  go to state 51
+    numero    go to state 52
+    fator     go to state 81
 
 
 State 78
 
-   28 expressao: expressao relacao expressao_simples .
-   30 expressao_simples: expressao_simples . operacao termo
+   46 fator: ABRE_PARENTESES expressao FECHA_PARENTESES .
 
-    MAIS   shift, and go to state 69
-    MENOS  shift, and go to state 70
-    OR     shift, and go to state 71
-
-    $default  reduce using rule 28 (expressao)
-
-    operacao  go to state 72
+    $default  reduce using rule 46 (fator)
 
 
 State 79
 
-   30 expressao_simples: expressao_simples operacao termo .
-   41 termo: termo . operacao_fator fator
+   29 expressao: expressao relacao expressao_simples .
+   31 expressao_simples: expressao_simples . operacao termo
 
-    MULTIPLICACAO  shift, and go to state 73
-    AND            shift, and go to state 74
-    DIV            shift, and go to state 75
+    MAIS   shift, and go to state 70
+    MENOS  shift, and go to state 71
+    OR     shift, and go to state 72
 
-    $default  reduce using rule 30 (expressao_simples)
+    $default  reduce using rule 29 (expressao)
 
-    operacao_fator  go to state 76
+    operacao  go to state 73
 
 
 State 80
 
-   41 termo: termo operacao_fator fator .
+   31 expressao_simples: expressao_simples operacao termo .
+   42 termo: termo . operacao_fator fator
 
-    $default  reduce using rule 41 (termo)
+    MULTIPLICACAO  shift, and go to state 74
+    AND            shift, and go to state 75
+    DIV            shift, and go to state 76
+
+    $default  reduce using rule 31 (expressao_simples)
+
+    operacao_fator  go to state 77
+
+
+State 81
+
+   42 termo: termo operacao_fator fator .
+
+    $default  reduce using rule 42 (termo)
