@@ -183,6 +183,16 @@ numero:
    }
 ;
 
+boolean:
+   TRUE 
+   {
+      tipo_variavel = TIPO_BOOLEAN;
+   } 
+   | FALSE
+   {
+      tipo_variavel = TIPO_BOOLEAN;
+   }
+;
 expressao: 
    expressao relacao expressao_simples {verificaTipos(pilhaExpr, pilhaExpr, TIPO_BOOLEAN);}|
    expressao_simples
@@ -211,6 +221,7 @@ termo:
 fator:
    variavel {insere_pilha(pilhaFator, tipo_variavel);} |
    numero {insere_pilha(pilhaFator, tipo_variavel); } |
+   boolean {insere_pilha(pilhaFator, tipo_variavel); } |
    ABRE_PARENTESES expressao FECHA_PARENTESES |
    NOT fator
 ;
