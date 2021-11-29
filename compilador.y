@@ -172,6 +172,7 @@ variavel:
          imprimeErro("Variavel não encontrada");
       }
 
+      adicionaCodigoCarregaValor(variavel, token);
       printf("variavel = %s\n", token);
    }
 ;
@@ -180,6 +181,8 @@ numero:
    NUMERO
    {
       tipo_variavel = TIPO_INTEGER;
+
+      adicionaCodigoCarregaConstante(token);
    }
 ;
 
@@ -187,10 +190,12 @@ boolean:
    TRUE 
    {
       tipo_variavel = TIPO_BOOLEAN;
+      adicionaCodigoCarregaConstante(token);
    } 
    | FALSE
    {
       tipo_variavel = TIPO_BOOLEAN;
+      adicionaCodigoCarregaConstante(token);
    }
 ;
 expressao: 
