@@ -190,12 +190,12 @@ boolean:
    TRUE 
    {
       tipo_variavel = TIPO_BOOLEAN;
-      adicionaCodigoCarregaConstante(token);
+      adicionaCodigoCarregaConstante("1");
    } 
    | FALSE
    {
       tipo_variavel = TIPO_BOOLEAN;
-      adicionaCodigoCarregaConstante(token);
+      adicionaCodigoCarregaConstante("2");
    }
 ;
 expressao: 
@@ -209,7 +209,12 @@ expressao_simples:
 ;
 
 relacao:
-   IGUAL | DIFERENTE | MENOR | MENOR_IGUAL | MAIOR_IGUAL | MAIOR 
+   IGUAL { adicionaCodigoIgual(); } | 
+   DIFERENTE { adicionaCodigoDiferente(); } | 
+   MENOR { adicionaCodigoMenor(); } | 
+   MENOR_IGUAL { adicionaCodigoMenorIgual(); } | 
+   MAIOR_IGUAL { adicionaCodigoMaiorIgual(); } | 
+   MAIOR { adicionaCodigoMaior(); } 
 ;
 
 termo_com_sinal: 
@@ -232,9 +237,21 @@ fator:
 ;
 
 operacao:
-   MAIS {tipo_operacao = TIPO_INTEGER;}|
-   MENOS {tipo_operacao = TIPO_INTEGER;}|
-   OR   {tipo_operacao = TIPO_BOOLEAN;}
+   MAIS 
+   {
+      tipo_operacao = TIPO_INTEGER;
+      adicionaCodigoMais();
+   }
+   | MENOS 
+   {
+      tipo_operacao = TIPO_INTEGER;
+      adicionaCodigoMenos();
+   }
+   | OR 
+   {
+      tipo_operacao = TIPO_BOOLEAN;
+      adicionaCodigoOr();
+   }
 ;
 
 

@@ -27,13 +27,43 @@ void adicionaCodigoCarregaValor(simbolo_t *simbolo, char *token)
 void adicionaCodigoCarregaConstante(char *token)
 {
     char codigo[] = "CRCT ";
-    if (strcmp(token, "true") == 0) {
-        token = "1";
-    }
-    if (strcmp(token, "false") == 0) {
-        token = "0";
-    }
-    
     strcat(codigo, token);
     geraCodigo(NULL, codigo);
+}
+
+void adicionaCodigoIgual()
+{
+    geraCodigo(NULL, "CMIG");
+}
+void adicionaCodigoDiferente()
+{
+    geraCodigo(NULL, "CMDG");
+}
+void adicionaCodigoMenor()
+{
+    geraCodigo(NULL, "CMME");
+}
+void adicionaCodigoMenorIgual()
+{
+    geraCodigo(NULL, "CMEG");
+}
+void adicionaCodigoMaiorIgual()
+{
+    geraCodigo(NULL, "CMAG");
+}
+void adicionaCodigoMaior()
+{
+    geraCodigo(NULL, "CMMA");
+}
+void adicionaCodigoMais()
+{
+    geraCodigo(NULL, "SOMA");
+}
+void adicionaCodigoMenos()
+{
+    geraCodigo(NULL, "SUBT");
+}
+void adicionaCodigoOr()
+{
+    geraCodigo(NULL, "DISJ");
 }

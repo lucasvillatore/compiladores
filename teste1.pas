@@ -2,5 +2,5 @@ program varsGlobais (input, output);
 var a, b: integer;
 k1, temp : boolean;
 begin
-k1 := true;
+a := a + b;
 end.
