@@ -213,7 +213,13 @@ expressao:
 ;
 
 expressao_simples:
-   expressao_simples operacao termo {verificaComparacao(pilhaExpr, pilhaTermo, remove_pilha(pilhaOpers));} |
+   expressao_simples operacao termo 
+   {
+      tipo_operacao = remove_pilha(pilhaOpers);
+      verificaComparacao(pilhaExpr, pilhaTermo, tipo_operacao);
+      adicionaCodigoOperacao(tipo_operacao);
+
+   } |
    termo_com_sinal {insere_pilha(pilhaExpr, remove_pilha(pilhaTermo)); printf("termsosinal\n");}
 ;
 
@@ -233,7 +239,12 @@ termo_com_sinal:
 ;
 
 termo:
-   termo operacao_fator fator { verificaComparacao(pilhaTermo, pilhaFator, remove_pilha(pilhaOpers)); } |
+   termo operacao_fator fator 
+   {    
+      tipo_operacao = remove_pilha(pilhaOpers);
+      verificaComparacao(pilhaTermo, pilhaFator, tipo_operacao);
+      adicionaCodigoOperacao(tipo_operacao);
+   } |
    fator {insere_pilha(pilhaTermo, remove_pilha(pilhaFator)); printf("fator\n");}
 ;
 
@@ -249,26 +260,23 @@ fator:
 operacao:
    MAIS 
    {
-      insere_pilha(pilhaOpers, TIPO_INTEGER);
-      adicionaCodigoMais();
+      insere_pilha(pilhaOpers, 3);
    }
    | MENOS 
    {
-      insere_pilha(pilhaOpers, TIPO_INTEGER);
-      adicionaCodigoMenos();
+      insere_pilha(pilhaOpers, 4);
    }
    | OR 
    {
-      insere_pilha(pilhaOpers, TIPO_BOOLEAN);
-      adicionaCodigoOr();
+      insere_pilha(pilhaOpers, 6);
    }
 ;
 
 
 operacao_fator:
-   MULTIPLICACAO {insere_pilha(pilhaOpers, TIPO_INTEGER);}|
-   DIV {insere_pilha(pilhaOpers, TIPO_INTEGER);}|
-   AND  {insere_pilha(pilhaOpers, TIPO_BOOLEAN);}
+   MULTIPLICACAO {insere_pilha(pilhaOpers, 1);}|
+   DIV {insere_pilha(pilhaOpers, 2);}|
+   AND  {insere_pilha(pilhaOpers, 5);}
 ;
 
 %%

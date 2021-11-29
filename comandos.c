@@ -69,6 +69,21 @@ void adicionaCodigoOr()
     geraCodigo(NULL, "DISJ");
 }
 
+void adicionaCodigoMult()
+{
+    geraCodigo(NULL, "MULT");
+}
+
+void adicionaCodigoDiv()
+{
+    geraCodigo(NULL, "DIVI");
+}
+
+void adicionaCodigoAnd()
+{
+    geraCodigo(NULL, "CONJ");
+}
+
 void adicionaCodigoRelacao(int relacao){
     switch (relacao)
     {
@@ -95,16 +110,44 @@ void adicionaCodigoRelacao(int relacao){
     }
 }
 
+void adicionaCodigoOperacao(int relacao){
+    printf("----- relacao = %d ------\n", relacao);
+    switch (relacao)
+    {
+    case 1:
+        adicionaCodigoMult();
+        break;
+    case 2:
+        adicionaCodigoDiv();
+        break;
+    case 3:
+        adicionaCodigoMais();
+        break;
+    case 4:
+        adicionaCodigoMenos();
+        break;
+
+    case 5:
+        adicionaCodigoAnd();
+        break;
+    case 6:
+        adicionaCodigoOr();
+        break;
+    default:
+        break;
+    }
+}
+
 void verificaComparacao(pilha_t *p1, pilha_t *p2, int tipoComparacao){
     int t1 = remove_pilha(p1), t2 = remove_pilha(p2);
 
     if (t1 != t2)
        imprimeErro("Tipos diferentes na operação");
 
-    if (t1 != tipoComparacao)
+    if (t1 == 0 && tipoComparacao > 4)
        imprimeErro("Tipos invalidos na operação");
 
-   insere_pilha(p1, tipoComparacao);
+    insere_pilha(p1, t1);
 }
 
 void verificaRelacao(pilha_t *p1, pilha_t *p2, int tipoRelacao){
