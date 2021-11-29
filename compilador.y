@@ -23,12 +23,15 @@ int deslocamento_anterior;
 int tipo_variavel;
 int tipo_variavel_atribuicao;
 int tipo_operacao;
+int tipo_relacao;
 simbolo_t *novo_simbolo;
 simbolo_t *variavel;
 
 pilha_t *pilhaExpr;
 pilha_t *pilhaTermo;
 pilha_t *pilhaFator;
+pilha_t *pilhaRelac;
+pilha_t *pilhaOpers;
 
 void verificaTipos(pilha_t *p1, pilha_t *p2, int tipoComparacao);
 
@@ -54,7 +57,7 @@ programa:
    ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
    bloco PONTO 
    {
-      mostra_tabela_simbolos(tabela_simbolos);
+      //mostra_tabela_simbolos(tabela_simbolos);
       adicionaCodigoDMEM(dmem);
       geraCodigo (NULL, "PARA");
    };
@@ -199,22 +202,28 @@ boolean:
    }
 ;
 expressao: 
-   expressao relacao expressao_simples {verificaTipos(pilhaExpr, pilhaExpr, TIPO_BOOLEAN);}|
-   expressao_simples
+   expressao relacao expressao_simples 
+   {
+      tipo_relacao = remove_pilha(pilhaRelac);
+      verificaRelacao(pilhaExpr, pilhaExpr, tipo_relacao);
+      adicionaCodigoRelacao(tipo_relacao);
+      printf("expressao %d \n", tipo_relacao);
+   } |
+   expressao_simples { printf("expressao simples direta\n");}
 ;
 
 expressao_simples:
-   expressao_simples operacao termo {verificaTipos(pilhaExpr, pilhaTermo, tipo_operacao);} |
-   termo_com_sinal {insere_pilha(pilhaExpr, remove_pilha(pilhaTermo));}
+   expressao_simples operacao termo {verificaComparacao(pilhaExpr, pilhaTermo, remove_pilha(pilhaOpers));} |
+   termo_com_sinal {insere_pilha(pilhaExpr, remove_pilha(pilhaTermo)); printf("termsosinal\n");}
 ;
 
 relacao:
-   IGUAL { adicionaCodigoIgual(); } | 
-   DIFERENTE { adicionaCodigoDiferente(); } | 
-   MENOR { adicionaCodigoMenor(); } | 
-   MENOR_IGUAL { adicionaCodigoMenorIgual(); } | 
-   MAIOR_IGUAL { adicionaCodigoMaiorIgual(); } | 
-   MAIOR { adicionaCodigoMaior(); } 
+   IGUAL { insere_pilha(pilhaRelac, 1); } | 
+   DIFERENTE  { insere_pilha(pilhaRelac, 2); }| 
+   MENOR  { insere_pilha(pilhaRelac, 3); } | 
+   MENOR_IGUAL  { insere_pilha(pilhaRelac, 4); } | 
+   MAIOR_IGUAL  { insere_pilha(pilhaRelac, 5); } | 
+   MAIOR  { insere_pilha(pilhaRelac, 6); }
 ;
 
 termo_com_sinal: 
@@ -224,53 +233,45 @@ termo_com_sinal:
 ;
 
 termo:
-   termo operacao_fator fator { verificaTipos(pilhaTermo, pilhaFator, tipo_operacao); } |
-   fator {insere_pilha(pilhaTermo, remove_pilha(pilhaFator));}
+   termo operacao_fator fator { verificaComparacao(pilhaTermo, pilhaFator, remove_pilha(pilhaOpers)); } |
+   fator {insere_pilha(pilhaTermo, remove_pilha(pilhaFator)); printf("fator\n");}
 ;
 
 fator:
-   variavel {insere_pilha(pilhaFator, tipo_variavel);} |
+   variavel {insere_pilha(pilhaFator, tipo_variavel); } |
    numero {insere_pilha(pilhaFator, tipo_variavel); } |
    boolean {insere_pilha(pilhaFator, tipo_variavel); } |
-   ABRE_PARENTESES expressao FECHA_PARENTESES |
+   ABRE_PARENTESES expressao FECHA_PARENTESES 
+   {insere_pilha(pilhaFator, remove_pilha(pilhaExpr));} |
    NOT fator
 ;
 
 operacao:
    MAIS 
    {
-      tipo_operacao = TIPO_INTEGER;
+      insere_pilha(pilhaOpers, TIPO_INTEGER);
       adicionaCodigoMais();
    }
    | MENOS 
    {
-      tipo_operacao = TIPO_INTEGER;
+      insere_pilha(pilhaOpers, TIPO_INTEGER);
       adicionaCodigoMenos();
    }
    | OR 
    {
-      tipo_operacao = TIPO_BOOLEAN;
+      insere_pilha(pilhaOpers, TIPO_BOOLEAN);
       adicionaCodigoOr();
    }
 ;
 
 
 operacao_fator:
-   MULTIPLICACAO {tipo_operacao = TIPO_INTEGER;}|
-   DIV {tipo_operacao = TIPO_INTEGER;}|
-   AND  {tipo_operacao = TIPO_BOOLEAN;}
+   MULTIPLICACAO {insere_pilha(pilhaOpers, TIPO_INTEGER);}|
+   DIV {insere_pilha(pilhaOpers, TIPO_INTEGER);}|
+   AND  {insere_pilha(pilhaOpers, TIPO_BOOLEAN);}
 ;
 
 %%
-
-void verificaTipos(pilha_t *p1, pilha_t *p2, int tipoComparacao){
-   int t1 = remove_pilha(p1), t2 = remove_pilha(p2);
-
-   if (t1 != t2)
-      imprimeErro("Tipos diferentes na operação");
-
-   insere_pilha(p1, tipoComparacao);
-}
 
 int main (int argc, char** argv) {
    FILE* fp;
@@ -291,7 +292,8 @@ int main (int argc, char** argv) {
    pilhaExpr = cria_pilha();
    pilhaTermo = cria_pilha();
    pilhaFator = cria_pilha();
-
+   pilhaRelac = cria_pilha();
+   pilhaOpers= cria_pilha();
 /* -------------------------------------------------------------------
  *  Inicia a Tabela de S�mbolos
  * ------------------------------------------------------------------- */
