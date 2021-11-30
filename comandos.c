@@ -87,22 +87,22 @@ void adicionaCodigoAnd()
 void adicionaCodigoRelacao(int relacao){
     switch (relacao)
     {
-    case 1:
+    case RELACAO_IGUAL:
         adicionaCodigoIgual();
         break;
-    case 2:
+    case RELACAO_DIFERENTE:
         adicionaCodigoDiferente();
         break;
-    case 3:
+    case RELACAO_MENOR:
         adicionaCodigoMenor();
         break;
-    case 4:
+    case RELACAO_MENOR_IGUAL:
         adicionaCodigoMenorIgual();
         break;
-    case 5:
+    case RELACAO_MAIOR_IGUAL:
         adicionaCodigoMaiorIgual();
         break;
-    case 6:
+    case RELACAO_MAIOR:
         adicionaCodigoMaior();
         break;
     default:
@@ -114,23 +114,23 @@ void adicionaCodigoOperacao(int relacao){
     printf("----- relacao = %d ------\n", relacao);
     switch (relacao)
     {
-    case 1:
+    case OPERACAO_MULT:
         adicionaCodigoMult();
         break;
-    case 2:
+    case OPERACAO_DIV:
         adicionaCodigoDiv();
         break;
-    case 3:
+    case OPERACAO_MAIS:
         adicionaCodigoMais();
         break;
-    case 4:
+    case OPERACAO_MENOS:
         adicionaCodigoMenos();
         break;
 
-    case 5:
+    case OPERACAO_AND:
         adicionaCodigoAnd();
         break;
-    case 6:
+    case OPERACAO_OR:
         adicionaCodigoOr();
         break;
     default:
@@ -138,26 +138,37 @@ void adicionaCodigoOperacao(int relacao){
     }
 }
 
-void verificaComparacao(pilha_t *p1, pilha_t *p2, int tipoComparacao){
+int operacaoBoleana(int tipoComparacao)
+{
+    return (tipoComparacao == OPERACAO_AND || tipoComparacao == OPERACAO_OR);
+}
+
+void verificaOperacao(pilha_t *p1, pilha_t *p2, int tipoComparacao){
     int t1 = remove_pilha(p1), t2 = remove_pilha(p2);
 
     if (t1 != t2)
        imprimeErro("Tipos diferentes na operação");
 
-    if (t1 == 0 && tipoComparacao > 4)
+    if ((t1 == TIPO_INTEGER && operacaoBoleana(tipoComparacao)) || 
+        (t1 == TIPO_BOOLEAN && !operacaoBoleana(tipoComparacao)))
        imprimeErro("Tipos invalidos na operação");
 
     insere_pilha(p1, t1);
+}
+
+int relacoesInteiras(int tipoRelacao)
+{
+    return tipoRelacao > 1;
 }
 
 void verificaRelacao(pilha_t *p1, pilha_t *p2, int tipoRelacao){
    int t1 = remove_pilha(p1), t2 = remove_pilha(p2);
 
    if (t1 != t2)
-      imprimeErro("Tipos diferentes na operação");
+      imprimeErro("Tipos diferentes na relação");
 
-    if (t1 == 1 && tipoRelacao > 2)
-      imprimeErro("Tipos invalidos na operação");
+    if (t1 == TIPO_BOOLEAN && relacoesInteiras(tipoRelacao))
+      imprimeErro("Tipos invalidos na relação");
 
    insere_pilha(p1, TIPO_BOOLEAN);
 }

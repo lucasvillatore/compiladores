@@ -57,7 +57,7 @@ programa:
    ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
    bloco PONTO 
    {
-      //mostra_tabela_simbolos(tabela_simbolos);
+      mostra_tabela_simbolos(tabela_simbolos);
       adicionaCodigoDMEM(dmem);
       geraCodigo (NULL, "PARA");
    };
@@ -106,9 +106,9 @@ lista_id_var:
       num_vars++;
       dmem++;
 
-      deslocamento++;
       novo_simbolo = cria_simbolo(token, VARIAVEL_SIMPLES, nivel_lexico, deslocamento, TIPO_UNDEFINED);
       adiciona_simbolo_tabela_simbolos(novo_simbolo, tabela_simbolos);
+      deslocamento++;
    } 
    | IDENT 
    { 
@@ -120,9 +120,9 @@ lista_id_var:
       num_vars++;
       dmem++;
 
-      deslocamento++;
       novo_simbolo = cria_simbolo(token, VARIAVEL_SIMPLES, nivel_lexico, deslocamento, TIPO_UNDEFINED);
       adiciona_simbolo_tabela_simbolos(novo_simbolo, tabela_simbolos);
+      deslocamento++;
    }
 ;
 
@@ -216,7 +216,7 @@ expressao_simples:
    expressao_simples operacao termo 
    {
       tipo_operacao = remove_pilha(pilhaOpers);
-      verificaComparacao(pilhaExpr, pilhaTermo, tipo_operacao);
+      verificaOperacao(pilhaExpr, pilhaTermo, tipo_operacao);
       adicionaCodigoOperacao(tipo_operacao);
 
    } |
@@ -224,12 +224,12 @@ expressao_simples:
 ;
 
 relacao:
-   IGUAL { insere_pilha(pilhaRelac, 1); } | 
-   DIFERENTE  { insere_pilha(pilhaRelac, 2); }| 
-   MENOR  { insere_pilha(pilhaRelac, 3); } | 
-   MENOR_IGUAL  { insere_pilha(pilhaRelac, 4); } | 
-   MAIOR_IGUAL  { insere_pilha(pilhaRelac, 5); } | 
-   MAIOR  { insere_pilha(pilhaRelac, 6); }
+   IGUAL { insere_pilha(pilhaRelac, RELACAO_IGUAL); } | 
+   DIFERENTE  { insere_pilha(pilhaRelac, RELACAO_DIFERENTE); }| 
+   MENOR  { insere_pilha(pilhaRelac, RELACAO_MENOR); } | 
+   MENOR_IGUAL  { insere_pilha(pilhaRelac, RELACAO_MENOR_IGUAL); } | 
+   MAIOR_IGUAL  { insere_pilha(pilhaRelac, RELACAO_MAIOR_IGUAL); } | 
+   MAIOR  { insere_pilha(pilhaRelac, RELACAO_MAIOR); }
 ;
 
 termo_com_sinal: 
@@ -242,7 +242,7 @@ termo:
    termo operacao_fator fator 
    {    
       tipo_operacao = remove_pilha(pilhaOpers);
-      verificaComparacao(pilhaTermo, pilhaFator, tipo_operacao);
+      verificaOperacao(pilhaTermo, pilhaFator, tipo_operacao);
       adicionaCodigoOperacao(tipo_operacao);
    } |
    fator {insere_pilha(pilhaTermo, remove_pilha(pilhaFator)); printf("fator\n");}
@@ -260,23 +260,23 @@ fator:
 operacao:
    MAIS 
    {
-      insere_pilha(pilhaOpers, 3);
+      insere_pilha(pilhaOpers, OPERACAO_MAIS);
    }
    | MENOS 
    {
-      insere_pilha(pilhaOpers, 4);
+      insere_pilha(pilhaOpers, OPERACAO_MENOS);
    }
    | OR 
    {
-      insere_pilha(pilhaOpers, 6);
+      insere_pilha(pilhaOpers, OPERACAO_OR);
    }
 ;
 
 
 operacao_fator:
-   MULTIPLICACAO {insere_pilha(pilhaOpers, 1);}|
-   DIV {insere_pilha(pilhaOpers, 2);}|
-   AND  {insere_pilha(pilhaOpers, 5);}
+   MULTIPLICACAO {insere_pilha(pilhaOpers, OPERACAO_MULT);}|
+   DIV {insere_pilha(pilhaOpers, OPERACAO_DIV);}|
+   AND  {insere_pilha(pilhaOpers, OPERACAO_AND);}
 ;
 
 %%

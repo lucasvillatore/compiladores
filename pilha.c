@@ -10,6 +10,13 @@ enum tipos_categoria {
     VARIAVEL_SIMPLES, PARAMETRO_FORMAL, PROCEDIMENTO
 };
 
+enum tipos_relacao {
+    RELACAO_IGUAL, RELACAO_DIFERENTE, RELACAO_MENOR, RELACAO_MENOR_IGUAL, RELACAO_MAIOR_IGUAL, RELACAO_MAIOR
+};
+
+enum tipos_operacao {
+    OPERACAO_MAIS, OPERACAO_MENOS, OPERACAO_MULT, OPERACAO_DIV, OPERACAO_AND, OPERACAO_OR
+};
 
 typedef struct simbolo_s {
     char *nome;
@@ -109,7 +116,7 @@ void mostra_simbolo(simbolo_t *simbolo)
 void mostra_tabela_simbolos(tabela_simbolos_t *tabela)
 {
     for (int i = 0; i <= tabela->topo; i++) {
-        //mostra_simbolo(tabela->simbolos[i]);
+        mostra_simbolo(tabela->simbolos[i]);
     }
 }
 
@@ -121,26 +128,3 @@ void atualiza_tipo_variaveis_tabela_simbolos(tabela_simbolos_t *tabela, int tipo
     }
 
 }
-
-// int main()
-// {
-//     tabela_simbolos_t *tabela = aloca_tabela_simbolos();
-
-//     simbolo_t *simbolo = cria_simbolo("teste", VARIAVEL_SIMPLES, 0, 0, UNDEFINED);
-//     push(simbolo, tabela);
-//     simbolo = cria_simbolo("teste2", VARIAVEL_SIMPLES, 0, 1, UNDEFINED);
-//     push(simbolo, tabela);
-//     simbolo = cria_simbolo("teste3", VARIAVEL_SIMPLES, 0, 2, UNDEFINED);
-//     push(simbolo, tabela);
-//     simbolo = cria_simbolo("teste4", VARIAVEL_SIMPLES, 0, 3, UNDEFINED);
-//     push(simbolo, tabela);
-
-//     simbolo = busca(tabela, "teste5");
-
-//     if (simbolo) {
-//         printf("%s\n", simbolo->nome);
-//     }else {
-//         printf("Não encontrado\n");
-//     }
-//     mostra_quantidade(tabela);
-// }
