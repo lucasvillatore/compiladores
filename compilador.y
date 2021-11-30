@@ -15,6 +15,7 @@
 
 tabela_simbolos_t *tabela_simbolos;
 
+int num_rotulo;
 int num_vars;
 int dmem;
 int nivel_lexico;
@@ -24,6 +25,7 @@ int tipo_variavel;
 int tipo_variavel_atribuicao;
 int tipo_operacao;
 int tipo_relacao;
+int rotulo_atual;
 simbolo_t *novo_simbolo;
 simbolo_t *variavel;
 
@@ -32,8 +34,15 @@ pilha_t *pilhaTermo;
 pilha_t *pilhaFator;
 pilha_t *pilhaRelac;
 pilha_t *pilhaOpers;
+pilha_t *pilhaRot;
 
 void verificaTipos(pilha_t *p1, pilha_t *p2, int tipoComparacao);
+
+
+int criaRotulo()
+{
+   return num_rotulo++;
+}
 
 %}
 
@@ -46,6 +55,10 @@ void verificaTipos(pilha_t *p1, pilha_t *p2, int tipoComparacao);
 %token FECHA_COLCHETES IGUAL MENOR MAIOR DIFERENTE
 %token MAIOR_IGUAL MENOR_IGUAL READ WRITE FALSE
 %token TRUE INTEGER DIV NUMERO BOOLEAN
+
+%nonassoc LOWER_THAN_ELSE
+%nonassoc ELSE
+
 
 %%
 
@@ -143,7 +156,56 @@ comando:
 ;
 
 comando_sem_rotulo: 
-   atribuicao
+   atribuicao | 
+   cond_if |
+   cond_while |
+   comando_composto 
+;
+
+cond_while:
+   WHILE 
+   { 
+      rotulo_atual = criaRotulo();
+      insere_pilha(pilhaRot, rotulo_atual);
+      adicionaCodigoNada(rotulo_atual); 
+   } 
+   expressao 
+   { 
+      rotulo_atual = criaRotulo();
+      insere_pilha(pilhaRot, rotulo_atual);
+      adicionaDesviaSeFalso(rotulo_atual); 
+   }
+   DO 
+   comando_sem_rotulo 
+   { 
+      rotulo_atual = remove_pilha(pilhaRot);
+
+      adicionaCodigoDesviaSempre(remove_pilha(pilhaRot)); 
+      adicionaCodigoNada(rotulo_atual); 
+   }
+;
+
+cond_if: 
+   if_then cond_else
+   {
+      
+   }
+;
+
+if_then: 
+   IF expressao 
+   {
+    
+   }
+   THEN comando_sem_rotulo
+   {
+     
+   }
+;
+
+cond_else: 
+   ELSE comando_sem_rotulo
+   | %prec LOWER_THAN_ELSE
 ;
 
 atribuicao:
@@ -302,6 +364,7 @@ int main (int argc, char** argv) {
    pilhaFator = cria_pilha();
    pilhaRelac = cria_pilha();
    pilhaOpers= cria_pilha();
+   pilhaRot= cria_pilha();
 /* -------------------------------------------------------------------
  *  Inicia a Tabela de S�mbolos
  * ------------------------------------------------------------------- */
@@ -310,7 +373,9 @@ int main (int argc, char** argv) {
    num_vars = 0;
    deslocamento = 0;
    nivel_lexico = 0;
+   num_rotulo = 0;
    yyin=fp;
+
    yyparse();
 
    return 0;

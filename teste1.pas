@@ -2,5 +2,11 @@ program varsGlobais (input, output);
 var a, b: integer;
 k1, temp : boolean;
 begin
-k1 := (a > b) <> (a > b);
+while (a > b) do
+begin
+    while (a <> b) do
+    begin
+        a:= a - b;
+    end;
+end;
 end.
