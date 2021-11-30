@@ -26,6 +26,8 @@ int tipo_variavel_atribuicao;
 int tipo_operacao;
 int tipo_relacao;
 int rotulo_atual;
+int tipo_termo;
+int tipo_fator;
 simbolo_t *novo_simbolo;
 simbolo_t *variavel;
 simbolo_t *variavel_atribuicao;
@@ -148,8 +150,9 @@ lista_idents:
 comando_composto: T_BEGIN comandos T_END | T_BEGIN T_END;
 
 comandos: 
-   comando PONTO_E_VIRGULA comandos |
-   comando PONTO_E_VIRGULA 
+   comandos PONTO_E_VIRGULA comando |
+   comando PONTO_E_VIRGULA
+   comando
 ;
 
 comando:
@@ -160,7 +163,7 @@ comando_sem_rotulo:
    atribuicao | 
    cond_if |
    cond_while |
-   comando_composto 
+   comando_composto
 ;
 
 cond_while:
@@ -207,7 +210,6 @@ if_then:
       adicionaCodigoDesviaSempre(rotulo_atual);
       adicionaCodigoNada(remove_pilha(pilhaRot));
       insere_pilha(pilhaRot, rotulo_atual);
-
    }
 ;
 
@@ -225,7 +227,7 @@ atribuicao:
       
       mostra_simbolo(variavel_atribuicao);
       adicionaCodigoArmazena(variavel_atribuicao);
-   }
+   } | 
 ;
 
 variavel_atribuicao:
@@ -306,8 +308,24 @@ relacao:
 ;
 
 termo_com_sinal: 
-   MAIS termo |
-   MENOS termo |
+   MAIS termo 
+   {
+      tipo_termo = remove_pilha(pilhaTermo);
+      if (tipo_termo != TIPO_INTEGER)
+         imprimeErro("Sinal inválido para o termo");
+
+      insere_pilha(pilhaTermo, tipo_termo);
+   } |
+   MENOS termo 
+   {
+      tipo_termo = remove_pilha(pilhaTermo);
+      if (tipo_termo != TIPO_INTEGER)
+         imprimeErro("Sinal inválido para o termo");
+
+      insere_pilha(pilhaTermo, tipo_termo);
+
+      adicionaCodigoInverteValor();
+   } |
    termo
 ;
 
@@ -327,7 +345,15 @@ fator:
    boolean {insere_pilha(pilhaFator, tipo_variavel); } |
    ABRE_PARENTESES expressao FECHA_PARENTESES 
    {insere_pilha(pilhaFator, remove_pilha(pilhaExpr));} |
-   NOT fator
+   NOT fator {
+      tipo_fator = remove_pilha(pilhaFator);
+      if (tipo_fator != TIPO_BOOLEAN)
+         imprimeErro("Operação inválda para o fator");
+
+      insere_pilha(pilhaFator, tipo_fator);
+
+      adicionaCodigoNegaValor();
+   } 
 ;
 
 operacao:

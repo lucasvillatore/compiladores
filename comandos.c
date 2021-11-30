@@ -205,3 +205,11 @@ void adicionaCodigoArmazena(simbolo_t *simbolo)
     sprintf(codigo, "ARMZ %d,%d", simbolo->nivel_lexico, simbolo->deslocamento);
     geraCodigo(NULL, codigo);
 }
+
+void adicionaCodigoInverteValor(){
+        geraCodigo(NULL, "INVR");
+}
+
+void adicionaCodigoNegaValor(){
+        geraCodigo(NULL, "NEGA");
+}
