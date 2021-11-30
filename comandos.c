@@ -198,3 +198,10 @@ void adicionaDesviaSeFalso(int rotulo)
     sprintf(codigo, "DSVF R%d", rotulo);
     geraCodigo(NULL, codigo);
 }
+
+void adicionaCodigoArmazena(simbolo_t *simbolo)
+{
+    char *codigo = (char *)malloc(sizeof(char) * 10);
+    sprintf(codigo, "ARMZ %d,%d", simbolo->nivel_lexico, simbolo->deslocamento);
+    geraCodigo(NULL, codigo);
+}

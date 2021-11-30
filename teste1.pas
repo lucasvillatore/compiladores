@@ -1,12 +1,12 @@
-program varsGlobais (input, output);
-var a, b: integer;
-k1, temp : boolean;
+program cmdIf (input, output);
+var i, j: integer;
 begin
-while (a > b) do
-begin
-    while (a <> b) do
-    begin
-        a:= a - b;
-    end;
-end;
+   i:=0;
+   j := i + 5;
+   j := j * i;
+   while (i < j) do
+   begin
+      if (i = 1) then
+        i := 1;   
+   end;
 end.

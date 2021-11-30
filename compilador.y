@@ -28,6 +28,7 @@ int tipo_relacao;
 int rotulo_atual;
 simbolo_t *novo_simbolo;
 simbolo_t *variavel;
+simbolo_t *variavel_atribuicao;
 
 pilha_t *pilhaExpr;
 pilha_t *pilhaTermo;
@@ -70,7 +71,7 @@ programa:
    ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
    bloco PONTO 
    {
-      mostra_tabela_simbolos(tabela_simbolos);
+      // mostra_tabela_simbolos(tabela_simbolos);
       adicionaCodigoDMEM(dmem);
       geraCodigo (NULL, "PARA");
    };
@@ -188,18 +189,25 @@ cond_while:
 cond_if: 
    if_then cond_else
    {
-      
-   }
+      adicionaCodigoNada(remove_pilha(pilhaRot));
+   } 
 ;
 
 if_then: 
    IF expressao 
    {
-    
+      rotulo_atual = criaRotulo();
+      insere_pilha(pilhaRot, rotulo_atual);
+      adicionaDesviaSeFalso(rotulo_atual); 
    }
    THEN comando_sem_rotulo
    {
-     
+      // pular o else
+      rotulo_atual = criaRotulo();
+      adicionaCodigoDesviaSempre(rotulo_atual);
+      adicionaCodigoNada(remove_pilha(pilhaRot));
+      insere_pilha(pilhaRot, rotulo_atual);
+
    }
 ;
 
@@ -214,15 +222,18 @@ atribuicao:
       //printf("%d %d\n", tipo_variavel, remove_pilha(pilhaExpr));
       if (tipo_variavel_atribuicao != remove_pilha(pilhaExpr))
          imprimeErro("Atribuicao com tipo de variavel invalido");
+      
+      mostra_simbolo(variavel_atribuicao);
+      adicionaCodigoArmazena(variavel_atribuicao);
    }
 ;
 
 variavel_atribuicao:
    IDENT 
    {
-      variavel = busca_simbolo(tabela_simbolos, token, nivel_lexico);
-      tipo_variavel_atribuicao = variavel->tipo;
-      if (!variavel) {
+      variavel_atribuicao = busca_simbolo(tabela_simbolos, token, nivel_lexico);
+      tipo_variavel_atribuicao = variavel_atribuicao->tipo;
+      if (!variavel_atribuicao) {
          imprimeErro("Variavel não encontrada");
       }
    } 
