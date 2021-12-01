@@ -9,6 +9,8 @@
 
 $DEPURA=1
 
+all: clean compilador
+
 compilador: lex.yy.c compilador.tab.c compilador.o compilador.h
 	gcc lex.yy.c compilador.tab.c compilador.o -o compilador -ll -ly -lc -g
 

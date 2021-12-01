@@ -26,7 +26,7 @@ void adicionaCodigoCarregaValor(simbolo_t *simbolo)
 
 void adicionaCodigoCarregaConstante(char *token)
 {
-    char codigo[] = "CRCT ";
+    char codigo[25] = "CRCT ";
     strcat(codigo, token);
     geraCodigo(NULL, codigo);
 }
