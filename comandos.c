@@ -17,7 +17,7 @@ void adicionaCodigoDMEM(int num_vars)
     geraCodigo(NULL, num_vars_str);
 }
 
-void adicionaCodigoCarregaValor(simbolo_t *simbolo, char *token)
+void adicionaCodigoCarregaValor(simbolo_t *simbolo)
 {
     char codigo[15];
     sprintf(codigo, "CRVL %d, %d", simbolo->nivel_lexico, simbolo->deslocamento);
@@ -207,9 +207,23 @@ void adicionaCodigoArmazena(simbolo_t *simbolo)
 }
 
 void adicionaCodigoInverteValor(){
-        geraCodigo(NULL, "INVR");
+    geraCodigo(NULL, "INVR");
 }
 
 void adicionaCodigoNegaValor(){
-        geraCodigo(NULL, "NEGA");
+    geraCodigo(NULL, "NEGA");
 }
+
+void adicionaCodigoLeitura(simbolo_t *simbolo)
+{
+    geraCodigo(NULL, "LEIT");
+    
+    adicionaCodigoArmazena(simbolo);
+}
+
+void adicionaCodigoEscrita(simbolo_t *simbolo)
+{
+    adicionaCodigoCarregaValor(simbolo);
+    geraCodigo(NULL, "IMPR");
+}
+

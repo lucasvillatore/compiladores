@@ -47,6 +47,17 @@ int criaRotulo()
    return num_rotulo++;
 }
 
+simbolo_t *obtemSimbolo(char *token)
+{
+   simbolo_t *simbolo = busca_simbolo_sem_nivel_lexico(tabela_simbolos, token);
+
+   if (!simbolo) {
+      imprimeErro("Variável não existe na tabela de símbolos");
+   }
+
+   return simbolo;
+}
+
 %}
 
 %token PROGRAM ABRE_PARENTESES FECHA_PARENTESES
@@ -164,20 +175,44 @@ comando_sem_rotulo:
    cond_if |
    cond_while |
    comando_composto |
-   read 
+   read |
+   write
 ;
 
-read_idents: 
-   IDENT {printf("-0-%s---\n",token);} VIRGULA {printf("-0-%s---\n",token);} lista_idents {printf("-0-%s---\n",token);} | 
-   IDENT {printf("-2-%s---\n",token);}
+read_idents:
+   read_idents VIRGULA IDENT 
+   { 
+      adicionaCodigoLeitura(obtemSimbolo(token)); 
+   } 
+   | IDENT 
+   { 
+      adicionaCodigoLeitura(obtemSimbolo(token)); 
+   }
 ;
 
 read:
    READ 
    ABRE_PARENTESES 
-   read_idents {printf("-4-%s---\n",token);} 
+   read_idents
    FECHA_PARENTESES 
-   {printf("-3-%s---\n",token);}
+;
+
+write_idents:
+   write_idents VIRGULA IDENT 
+   { 
+      adicionaCodigoEscrita(obtemSimbolo(token)); 
+   } 
+   | IDENT 
+   { 
+      adicionaCodigoEscrita(obtemSimbolo(token)); 
+   }
+;
+
+write:
+   WRITE 
+   ABRE_PARENTESES 
+   write_idents
+   FECHA_PARENTESES 
 ;
 
 cond_while:
@@ -247,22 +282,16 @@ atribuicao:
 variavel_atribuicao:
    IDENT 
    {
-      variavel_atribuicao = busca_simbolo(tabela_simbolos, token, nivel_lexico);
+      variavel_atribuicao = obtemSimbolo(token);
       tipo_variavel_atribuicao = variavel_atribuicao->tipo;
-      if (!variavel_atribuicao) {
-         imprimeErro("Variavel não encontrada");
-      }
    } 
 ;
 
 variavel:
    IDENT 
    {
-      variavel = busca_simbolo(tabela_simbolos, token, nivel_lexico);
+      variavel = obtemSimbolo(token);
       tipo_variavel = variavel->tipo;
-      if (!variavel) {
-         imprimeErro("Variavel não encontrada");
-      }
    }
 ;
 
@@ -352,7 +381,7 @@ termo:
 
 fator:
    variavel {
-      adicionaCodigoCarregaValor(variavel, token);
+      adicionaCodigoCarregaValor(variavel);
       insere_pilha(pilhaFator, tipo_variavel); 
    } |
    numero {insere_pilha(pilhaFator, tipo_variavel); } |

@@ -99,6 +99,21 @@ simbolo_t *busca_simbolo(tabela_simbolos_t *tabela, char *nome, int nivel_lexico
     return NULL;
 }
 
+simbolo_t *busca_simbolo_sem_nivel_lexico(tabela_simbolos_t *tabela, char *nome)
+{
+    if (tabela->topo == -1) {
+        return NULL;
+    }
+
+    for (int i = tabela->topo; i >= 0; i--) {
+        if (!strcmp(nome, tabela->simbolos[i]->nome)) {
+            return tabela->simbolos[i];
+        }
+    }
+
+    return NULL;
+}
+
 void mostra_quantidade(tabela_simbolos_t *tabela)
 {
     printf("%d\n", tabela->topo + 1);
