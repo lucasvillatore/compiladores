@@ -18,6 +18,9 @@ enum tipos_operacao {
     OPERACAO_MAIS, OPERACAO_MENOS, OPERACAO_MULT, OPERACAO_DIV, OPERACAO_AND, OPERACAO_OR
 };
 
+enum tipo_variavel_funcao {
+    POR_VALOR, POR_REFERENCIA
+};
 typedef struct simbolo_s {
     char *nome;
     int categoria;
