@@ -163,7 +163,21 @@ comando_sem_rotulo:
    atribuicao | 
    cond_if |
    cond_while |
-   comando_composto
+   comando_composto |
+   read 
+;
+
+read_idents: 
+   IDENT {printf("-0-%s---\n",token);} VIRGULA {printf("-0-%s---\n",token);} lista_idents {printf("-0-%s---\n",token);} | 
+   IDENT {printf("-2-%s---\n",token);}
+;
+
+read:
+   READ 
+   ABRE_PARENTESES 
+   read_idents {printf("-4-%s---\n",token);} 
+   FECHA_PARENTESES 
+   {printf("-3-%s---\n",token);}
 ;
 
 cond_while:
@@ -249,9 +263,6 @@ variavel:
       if (!variavel) {
          imprimeErro("Variavel não encontrada");
       }
-
-      adicionaCodigoCarregaValor(variavel, token);
-      printf("variavel = %s\n", token);
    }
 ;
 
@@ -340,7 +351,10 @@ termo:
 ;
 
 fator:
-   variavel {insere_pilha(pilhaFator, tipo_variavel); } |
+   variavel {
+      adicionaCodigoCarregaValor(variavel, token);
+      insere_pilha(pilhaFator, tipo_variavel); 
+   } |
    numero {insere_pilha(pilhaFator, tipo_variavel); } |
    boolean {insere_pilha(pilhaFator, tipo_variavel); } |
    ABRE_PARENTESES expressao FECHA_PARENTESES 
