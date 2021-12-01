@@ -227,3 +227,8 @@ void adicionaCodigoEscrita(simbolo_t *simbolo)
     geraCodigo(NULL, "IMPR");
 }
 
+void adicionaCodigoEscritaConstante(char *token)
+{
+    adicionaCodigoCarregaConstante(token);
+    geraCodigo(NULL, "IMPR");
+}

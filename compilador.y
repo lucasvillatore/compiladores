@@ -187,7 +187,7 @@ read_idents:
    | IDENT 
    { 
       adicionaCodigoLeitura(obtemSimbolo(token)); 
-   }
+   } 
 ;
 
 read:
@@ -205,6 +205,14 @@ write_idents:
    | IDENT 
    { 
       adicionaCodigoEscrita(obtemSimbolo(token)); 
+   }
+   | write_idents VIRGULA NUMERO 
+   { 
+      adicionaCodigoEscritaConstante(token); 
+   } 
+   | NUMERO 
+   { 
+      adicionaCodigoEscritaConstante(token); 
    }
 ;
 
