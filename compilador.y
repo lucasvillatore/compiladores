@@ -93,14 +93,16 @@ programa:
 bloco:
    parte_declara_vars
 
-   parte_declara_subrotinas_ou_vazio
+   parte_declara_subrotinas
 
    comando_composto;
 
 parte_declara_vars: var;
 
+parte_declara_subrotinas:
+   parte_declara_subrotinas declara_subrotina | 
 
-parte_declara_subrotinas_ou_vazio:
+declara_subrotina:
    {
       nivel_lexico++;
       insere_pilha(pilhaRot, (rotulo_atual = criaRotulo()));
@@ -110,8 +112,7 @@ parte_declara_subrotinas_ou_vazio:
       num_vars = 0;
 
    } 
-   
-   parte_declara_subrotinas
+   declara_tipo_subrotina
    { 
       adicionaCodigoDMEM(num_vars); 
       adicionaCodigoRetornaProcedimento(nivel_lexico, 0);
@@ -119,14 +120,11 @@ parte_declara_subrotinas_ou_vazio:
       nivel_lexico--;
       num_vars = remove_pilha(pilhaNVars);
       adicionaCodigoNada(remove_pilha(pilhaRot));
-   }  | 
+   }
+;
 
-;
-parte_declara_subrotinas: 
-   parte_declara_subtorinas declara_subrotinas 
-;
-declara_subrotinas:
-   declara_procedimento |
+declara_tipo_subrotina:
+   declara_procedimento
 ;
 
 declara_procedimento:
