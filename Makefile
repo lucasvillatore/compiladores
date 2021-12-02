@@ -24,4 +24,4 @@ compilador.o : compilador.h compiladorF.c
 	gcc -c compiladorF.c -o compilador.o -g
 
 clean :
-	rm -f compilador.tab.* lex.yy.c compilador.o compilador
+	rm -f compilador.tab.* lex.yy.c compilador.o compilador.output compilador
