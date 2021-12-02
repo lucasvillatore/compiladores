@@ -38,26 +38,3 @@ int remove_pilha(pilha_t *p)
 
     return p->itens[p->topo--];
 }
-
-// int main()
-// {
-//     tabela_simbolos_t *tabela = aloca_tabela_simbolos();
-
-//     simbolo_t *simbolo = cria_simbolo("teste", VARIAVEL_SIMPLES, 0, 0, UNDEFINED);
-//     push(simbolo, tabela);
-//     simbolo = cria_simbolo("teste2", VARIAVEL_SIMPLES, 0, 1, UNDEFINED);
-//     push(simbolo, tabela);
-//     simbolo = cria_simbolo("teste3", VARIAVEL_SIMPLES, 0, 2, UNDEFINED);
-//     push(simbolo, tabela);
-//     simbolo = cria_simbolo("teste4", VARIAVEL_SIMPLES, 0, 3, UNDEFINED);
-//     push(simbolo, tabela);
-
-//     simbolo = busca(tabela, "teste5");
-
-//     if (simbolo) {
-//         printf("%s\n", simbolo->nome);
-//     }else {
-//         printf("Não encontrado\n");
-//     }
-//     mostra_quantidade(tabela);
-// }

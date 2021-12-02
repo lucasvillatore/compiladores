@@ -1,14 +1,24 @@
 program cmdIf (input, output);
-var i, j: integer;       
-begin                   
-   read(j);                 
-   i:=0;                   
-   while (i < j) do        
-   begin                   
-      if (i div 2 * 2 = i)  
-        then   write(i,0)  
-        else   write(i,1); 
-      i := i+1                    
-   end;                    
+var i: integer;
+procedure teste;
+   procedure teste2;
+      procedure teste3;
+      begin
+         teste;
+      end;
+
+      procedure teste4;
+      begin
+      end;
+   begin
+      teste3;
+   end
+begin
+   teste2;
+end
+
+begin
+   teste;  
+   i := i * i + 2 + 10 + 10 div 10;  
 end. 
 

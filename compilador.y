@@ -31,7 +31,9 @@ int tipo_fator;
 simbolo_t *novo_simbolo;
 simbolo_t *variavel;
 simbolo_t *variavel_atribuicao;
+simbolo_t *procedimento;
 
+pilha_t *pilhaNVars;
 pilha_t *pilhaExpr;
 pilha_t *pilhaTermo;
 pilha_t *pilhaFator;
@@ -82,26 +84,80 @@ programa:
    }
    PROGRAM IDENT
    ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
-   bloco PONTO 
+   bloco { printf("oi\n\n"); } PONTO 
    {
-      // mostra_tabela_simbolos(tabela_simbolos);
-      adicionaCodigoDMEM(dmem);
+      adicionaCodigoDMEM(num_vars);
       geraCodigo (NULL, "PARA");
    };
 
 bloco:
    parte_declara_vars
-   { }
+
+   parte_declara_subrotinas_ou_vazio
+
    comando_composto;
 
 parte_declara_vars: var;
 
+
+parte_declara_subrotinas_ou_vazio:
+   {
+      nivel_lexico++;
+      insere_pilha(pilhaRot, (rotulo_atual = criaRotulo()));
+      adicionaCodigoDesviaSempre(rotulo_atual);
+      adicionaCodigoEntraProcedimento((rotulo_atual = criaRotulo()), nivel_lexico);
+      insere_pilha(pilhaNVars, num_vars);
+      num_vars = 0;
+
+   } 
+   
+   parte_declara_subrotinas
+   { 
+      adicionaCodigoDMEM(num_vars); 
+      adicionaCodigoRetornaProcedimento(nivel_lexico, 0);
+
+      nivel_lexico--;
+      num_vars = remove_pilha(pilhaNVars);
+      adicionaCodigoNada(remove_pilha(pilhaRot));
+   }  | 
+
+;
+parte_declara_subrotinas: 
+   parte_declara_subtorinas declara_subrotinas 
+;
+declara_subrotinas:
+   declara_procedimento |
+;
+
+declara_procedimento:
+   declara_procedimento_sem_ponto_virgula PONTO_E_VIRGULA | 
+   declara_procedimento_sem_ponto_virgula
+;
+
+declara_procedimento_sem_ponto_virgula:
+   PROCEDURE IDENT 
+   {
+      if (busca_simbolo(tabela_simbolos, token, nivel_lexico)) {
+         imprimeErro("Simbolo já existente na tabela de simbolos");
+      }
+
+      novo_simbolo = cria_simbolo_procedure(token, PROCEDURE, nivel_lexico, rotulo_atual);
+      adiciona_simbolo_tabela_simbolos(novo_simbolo, tabela_simbolos);
+      
+   } 
+   PONTO_E_VIRGULA bloco
+   {
+      remove_multiplos_simbolos(tabela_simbolos, num_vars);
+   }
+;
+
+
 var: 
-   VAR declara_vars | ;
+   VAR {num_vars=0;} declara_vars | ;
 
 declara_vars: 
-   declara_vars declara_var {num_vars=0; } | 
-   declara_var {num_vars=0; } 
+   declara_vars declara_var | 
+   declara_var  
 ;
 
 declara_var: 
@@ -133,7 +189,7 @@ lista_id_var:
       num_vars++;
       dmem++;
 
-      novo_simbolo = cria_simbolo(token, VARIAVEL_SIMPLES, nivel_lexico, deslocamento, TIPO_UNDEFINED);
+      novo_simbolo = cria_simbolo(token, VARIAVEL_SIMPLES, nivel_lexico, deslocamento, TIPO_UNDEFINED, 0);
       adiciona_simbolo_tabela_simbolos(novo_simbolo, tabela_simbolos);
       deslocamento++;
    } 
@@ -147,7 +203,7 @@ lista_id_var:
       num_vars++;
       dmem++;
 
-      novo_simbolo = cria_simbolo(token, VARIAVEL_SIMPLES, nivel_lexico, deslocamento, TIPO_UNDEFINED);
+      novo_simbolo = cria_simbolo(token, VARIAVEL_SIMPLES, nivel_lexico, deslocamento, TIPO_UNDEFINED, 0);
       adiciona_simbolo_tabela_simbolos(novo_simbolo, tabela_simbolos);
       deslocamento++;
    }
@@ -162,7 +218,7 @@ comando_composto: T_BEGIN comandos T_END | T_BEGIN T_END;
 
 comandos: 
    comandos PONTO_E_VIRGULA comando |
-   comando PONTO_E_VIRGULA
+   comandos PONTO_E_VIRGULA |
    comando
 ;
 
@@ -170,13 +226,46 @@ comando:
    comando_sem_rotulo 
 ;
 
-comando_sem_rotulo: 
-   atribuicao | 
+comando_sem_rotulo:  
    cond_if |
    cond_while |
    comando_composto |
    read |
-   write
+   write |
+   variavel_atribuicao atribuicao_chamada_procedimento
+;
+
+atribuicao_chamada_procedimento:
+   atribuicao | chama_procedure 
+;
+atribuicao:
+   ATRIBUICAO expressao
+   { 
+      if (tipo_variavel_atribuicao != remove_pilha(pilhaExpr))
+         imprimeErro("Atribuicao com tipo de variavel invalido");
+      
+      adicionaCodigoArmazena(variavel_atribuicao);
+   }
+;
+
+variavel_atribuicao:
+   IDENT 
+   {
+      printf("entro aqui %s\n", token); 
+      variavel_atribuicao = obtemSimbolo(token);
+      tipo_variavel_atribuicao = variavel_atribuicao->tipo;
+   } 
+;
+
+chama_procedure:
+   {
+      procedimento = variavel_atribuicao;
+      if (!procedimento) {
+         imprimeErro("Procedure não encontrada.");
+      }
+      
+      adicionaCodigoChamaProcedimento(procedimento->rotulo, nivel_lexico);
+   }
 ;
 
 read_idents:
@@ -273,26 +362,6 @@ if_then:
 cond_else: 
    ELSE comando_sem_rotulo
    | %prec LOWER_THAN_ELSE
-;
-
-atribuicao:
-   variavel_atribuicao ATRIBUICAO expressao
-   { 
-      //printf("%d %d\n", tipo_variavel, remove_pilha(pilhaExpr));
-      if (tipo_variavel_atribuicao != remove_pilha(pilhaExpr))
-         imprimeErro("Atribuicao com tipo de variavel invalido");
-      
-      mostra_simbolo(variavel_atribuicao);
-      adicionaCodigoArmazena(variavel_atribuicao);
-   } | 
-;
-
-variavel_atribuicao:
-   IDENT 
-   {
-      variavel_atribuicao = obtemSimbolo(token);
-      tipo_variavel_atribuicao = variavel_atribuicao->tipo;
-   } 
 ;
 
 variavel:
@@ -451,8 +520,9 @@ int main (int argc, char** argv) {
    pilhaTermo = cria_pilha();
    pilhaFator = cria_pilha();
    pilhaRelac = cria_pilha();
-   pilhaOpers= cria_pilha();
-   pilhaRot= cria_pilha();
+   pilhaOpers = cria_pilha();
+   pilhaRot = cria_pilha();
+   pilhaNVars = cria_pilha();
 /* -------------------------------------------------------------------
  *  Inicia a Tabela de S�mbolos
  * ------------------------------------------------------------------- */

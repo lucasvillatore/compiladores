@@ -185,6 +185,22 @@ void adicionaCodigoNada(int rotulo)
     geraCodigo(rotulo_str, "NADA");
 }
 
+void adicionaCodigoEntraProcedimento(int rotulo, int nivel_lexico)
+{
+    char *rotulo_str = (char *)malloc(sizeof(char) * 10);
+    sprintf(rotulo_str, "R%d", rotulo);
+    char *codigo = (char *)malloc(sizeof(char) * 10);
+    sprintf(codigo, "ENPR %d", nivel_lexico);
+    geraCodigo(rotulo_str, codigo);
+}
+
+void adicionaCodigoRetornaProcedimento(int nivel_lexico, int num_parametros)
+{
+    char *codigo = (char *)malloc(sizeof(char) * 10);
+    sprintf(codigo, "RTPR %d,%d", nivel_lexico, num_parametros);
+    geraCodigo(NULL, codigo);
+}
+
 void adicionaCodigoDesviaSempre(int rotulo)
 {
     char *codigo = (char *)malloc(sizeof(char) * 10);
@@ -231,4 +247,11 @@ void adicionaCodigoEscritaConstante(char *token)
 {
     adicionaCodigoCarregaConstante(token);
     geraCodigo(NULL, "IMPR");
+}
+
+void adicionaCodigoChamaProcedimento(int rotulo, int nivel_lexico)
+{
+    char *codigo = (char *)malloc(sizeof(char) * 10);
+    sprintf(codigo, "CHPR R%d,%d", rotulo, nivel_lexico);
+    geraCodigo(NULL, codigo);
 }

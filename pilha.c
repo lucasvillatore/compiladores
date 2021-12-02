@@ -27,6 +27,7 @@ typedef struct simbolo_s {
     int nivel_lexico;
     int tipo;
     int deslocamento;
+    int rotulo;
     
 }simbolo_t;
 
@@ -73,7 +74,15 @@ simbolo_t *remove_simbolo_tabela_simbolos(tabela_simbolos_t *tabela)
     return simbolo;
 }
 
-simbolo_t *cria_simbolo(char *nome, int categoria, int nivel_lexico, int deslocamento, int tipo) 
+void remove_multiplos_simbolos(tabela_simbolos_t *tabela, int quantidade)
+{
+    while(quantidade > 0) {
+        remove_simbolo_tabela_simbolos(tabela);
+        quantidade--;
+    } 
+}
+
+simbolo_t *cria_simbolo(char *nome, int categoria, int nivel_lexico, int deslocamento, int tipo, int rotulo) 
 {
     simbolo_t *simbolo = (simbolo_t *)malloc(sizeof(simbolo_t));
     simbolo->nome = (char *)malloc(strlen(nome) * sizeof(char));
@@ -83,6 +92,14 @@ simbolo_t *cria_simbolo(char *nome, int categoria, int nivel_lexico, int desloca
     simbolo->nivel_lexico = nivel_lexico;
     simbolo->tipo = tipo;
     simbolo->deslocamento = deslocamento;
+    simbolo->rotulo = rotulo;
+
+    return simbolo;
+}
+
+simbolo_t *cria_simbolo_procedure(char *nome, int categoria, int nivel_lexico, int rotulo)
+{
+    simbolo_t *simbolo = cria_simbolo(nome, categoria, nivel_lexico, 0, TIPO_UNDEFINED, rotulo);
 
     return simbolo;
 }
