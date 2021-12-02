@@ -237,15 +237,8 @@ void adicionaCodigoLeitura(simbolo_t *simbolo)
     adicionaCodigoArmazena(simbolo);
 }
 
-void adicionaCodigoEscrita(simbolo_t *simbolo)
+void adicionaCodigoEscrita()
 {
-    adicionaCodigoCarregaValor(simbolo);
-    geraCodigo(NULL, "IMPR");
-}
-
-void adicionaCodigoEscritaConstante(char *token)
-{
-    adicionaCodigoCarregaConstante(token);
     geraCodigo(NULL, "IMPR");
 }
 

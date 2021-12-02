@@ -17,7 +17,6 @@ tabela_simbolos_t *tabela_simbolos;
 
 int num_rotulo;
 int num_vars;
-int dmem;
 int nivel_lexico;
 int deslocamento;
 int deslocamento_anterior;
@@ -28,6 +27,8 @@ int tipo_relacao;
 int rotulo_atual;
 int tipo_termo;
 int tipo_fator;
+int total_parametros;
+int nParams;
 simbolo_t *novo_simbolo;
 simbolo_t *variavel;
 simbolo_t *variavel_atribuicao;
@@ -40,6 +41,7 @@ pilha_t *pilhaFator;
 pilha_t *pilhaRelac;
 pilha_t *pilhaOpers;
 pilha_t *pilhaRot;
+pilha_t *pilhaNParams;
 
 void verificaTipos(pilha_t *p1, pilha_t *p2, int tipoComparacao);
 
@@ -88,9 +90,11 @@ programa:
    {
       adicionaCodigoDMEM(num_vars);
       geraCodigo (NULL, "PARA");
+      mostra_tabela_simbolos(tabela_simbolos);
    };
 
 bloco:
+   {{  printf("blocko  %s\n", token); }}
    parte_declara_vars
 
    parte_declara_subrotinas
@@ -101,7 +105,7 @@ parte_declara_vars: var;
 
 parte_declara_subrotinas:
    parte_declara_subrotinas declara_subrotina | 
-
+;
 declara_subrotina:
    {
       nivel_lexico++;
@@ -109,13 +113,12 @@ declara_subrotina:
       adicionaCodigoDesviaSempre(rotulo_atual);
       adicionaCodigoEntraProcedimento((rotulo_atual = criaRotulo()), nivel_lexico);
       insere_pilha(pilhaNVars, num_vars);
-      num_vars = 0;
-
+      total_parametros=0;
    } 
    declara_tipo_subrotina
    { 
       adicionaCodigoDMEM(num_vars); 
-      adicionaCodigoRetornaProcedimento(nivel_lexico, 0);
+      adicionaCodigoRetornaProcedimento(nivel_lexico, total_parametros);
 
       nivel_lexico--;
       num_vars = remove_pilha(pilhaNVars);
@@ -141,14 +144,58 @@ declara_procedimento_sem_ponto_virgula:
 
       novo_simbolo = cria_simbolo_procedure(token, PROCEDURE, nivel_lexico, rotulo_atual);
       adiciona_simbolo_tabela_simbolos(novo_simbolo, tabela_simbolos);
-      
-   } 
-   PONTO_E_VIRGULA bloco
+       
+   } lista_parametros_formais PONTO_E_VIRGULA
+   { num_vars = 0; }
+   bloco
    {
       remove_multiplos_simbolos(tabela_simbolos, num_vars);
    }
 ;
 
+lista_parametros_formais: 
+   ABRE_PARENTESES sessoes_parametros_formais FECHA_PARENTESES 
+   {
+      nParams=0;
+      while ((nParams = remove_pilha(pilhaNParams)) != -1)
+         total_parametros+=nParams;
+      
+      atualiza_deslocamento_parametros_formais(tabela_simbolos,total_parametros);
+   } |
+;
+
+sessoes_parametros_formais: 
+   sessoes_parametros_formais PONTO_E_VIRGULA parametros_formais |
+   parametros_formais { printf("entro aqui reas %s\n", token);}
+;
+
+parametros_formais: 
+   {num_vars = 0;   printf("entro aqui %s\n", token); }
+   lista_id_parametros_formais DOIS_PONTOS tipo 
+   {
+      atualiza_tipo_variaveis_tabela_simbolos(tabela_simbolos, tipo_variavel, num_vars);
+
+      insere_pilha(pilhaNParams, num_vars);
+   }
+;
+
+lista_id_parametros_formais: 
+   lista_id_parametros_formais VIRGULA parametro_formal | 
+   parametro_formal 
+;
+
+parametro_formal: 
+   IDENT { 
+      if (busca_simbolo(tabela_simbolos, token, nivel_lexico)) {
+         imprimeErro("Simbolo já existente na tabela de simbolos");
+      }
+
+      num_vars++;
+
+      novo_simbolo = cria_simbolo(token, VARIAVEL_SIMPLES, nivel_lexico, 0, TIPO_UNDEFINED, 0);
+      adiciona_simbolo_tabela_simbolos(novo_simbolo, tabela_simbolos);
+   }
+;
 
 var: 
    VAR {num_vars=0;} declara_vars | ;
@@ -174,7 +221,8 @@ declara_var:
 tipo: 
    INTEGER 
    { tipo_variavel = TIPO_INTEGER; } |
-   BOOLEAN { tipo_variavel = TIPO_BOOLEAN; }
+   BOOLEAN 
+   { tipo_variavel = TIPO_BOOLEAN; }
 ;
 
 lista_id_var: 
@@ -185,8 +233,6 @@ lista_id_var:
       }
 
       num_vars++;
-      dmem++;
-
       novo_simbolo = cria_simbolo(token, VARIAVEL_SIMPLES, nivel_lexico, deslocamento, TIPO_UNDEFINED, 0);
       adiciona_simbolo_tabela_simbolos(novo_simbolo, tabela_simbolos);
       deslocamento++;
@@ -199,7 +245,6 @@ lista_id_var:
       }
 
       num_vars++;
-      dmem++;
 
       novo_simbolo = cria_simbolo(token, VARIAVEL_SIMPLES, nivel_lexico, deslocamento, TIPO_UNDEFINED, 0);
       adiciona_simbolo_tabela_simbolos(novo_simbolo, tabela_simbolos);
@@ -234,7 +279,17 @@ comando_sem_rotulo:
 ;
 
 atribuicao_chamada_procedimento:
-   atribuicao | chama_procedure 
+   atribuicao | 
+   {
+      procedimento = variavel_atribuicao;
+      if (!procedimento) {
+         imprimeErro("Procedure não encontrada.");
+      }      
+   } 
+   chama_procedure 
+   {
+      adicionaCodigoChamaProcedimento(procedimento->rotulo, nivel_lexico);
+   }
 ;
 atribuicao:
    ATRIBUICAO expressao
@@ -249,26 +304,42 @@ atribuicao:
 variavel_atribuicao:
    IDENT 
    {
-      printf("entro aqui %s\n", token); 
       variavel_atribuicao = obtemSimbolo(token);
       tipo_variavel_atribuicao = variavel_atribuicao->tipo;
+
    } 
 ;
 
 chama_procedure:
+   ABRE_PARENTESES {nParams=0;} lista_parametros_reais FECHA_PARENTESES 
    {
-      procedimento = variavel_atribuicao;
-      if (!procedimento) {
-         imprimeErro("Procedure não encontrada.");
-      }
+      if (nParams-1 != variavel_atribuicao->parametros)
+         imprimeErro("Chamada de subrotina com número incorreto de parâmetros");
+   } |
+;
+
+lista_parametros_reais:
+   lista_parametros_reais VIRGULA parametro_real |
+   parametro_real 
+;
+
+parametro_real: 
+    expressao {
+      if (variavel_atribuicao->parametros == 0 || nParams > variavel_atribuicao->parametros)
+         imprimeErro("Chamada de subrotina com número incorreto de parâmetros");
       
-      adicionaCodigoChamaProcedimento(procedimento->rotulo, nivel_lexico);
+      if(variavel_atribuicao->tiposParametros[nParams] != tipo_variavel)
+         imprimeErro("Parâmetro de tipo inválido");
+
+      nParams++;
    }
 ;
+
 
 read_idents:
    read_idents VIRGULA IDENT 
    { 
+     
       adicionaCodigoLeitura(obtemSimbolo(token)); 
    } 
    | IDENT 
@@ -285,22 +356,9 @@ read:
 ;
 
 write_idents:
-   write_idents VIRGULA IDENT 
-   { 
-      adicionaCodigoEscrita(obtemSimbolo(token)); 
-   } 
-   | IDENT 
-   { 
-      adicionaCodigoEscrita(obtemSimbolo(token)); 
-   }
-   | write_idents VIRGULA NUMERO 
-   { 
-      adicionaCodigoEscritaConstante(token); 
-   } 
-   | NUMERO 
-   { 
-      adicionaCodigoEscritaConstante(token); 
-   }
+
+   write_idents VIRGULA expressao {adicionaCodigoEscrita();} |
+   expressao {adicionaCodigoEscrita();}
 ;
 
 write:
@@ -349,7 +407,6 @@ if_then:
    }
    THEN comando_sem_rotulo
    {
-      // pular o else
       rotulo_atual = criaRotulo();
       adicionaCodigoDesviaSempre(rotulo_atual);
       adicionaCodigoNada(remove_pilha(pilhaRot));
@@ -391,15 +448,15 @@ boolean:
       adicionaCodigoCarregaConstante("0");
    }
 ;
+
 expressao: 
    expressao relacao expressao_simples 
    {
       tipo_relacao = remove_pilha(pilhaRelac);
       verificaRelacao(pilhaExpr, pilhaExpr, tipo_relacao);
       adicionaCodigoRelacao(tipo_relacao);
-      printf("expressao %d \n", tipo_relacao);
    } |
-   expressao_simples { printf("expressao simples direta\n");}
+   expressao_simples
 ;
 
 expressao_simples:
@@ -410,7 +467,7 @@ expressao_simples:
       adicionaCodigoOperacao(tipo_operacao);
 
    } |
-   termo_com_sinal {insere_pilha(pilhaExpr, remove_pilha(pilhaTermo)); printf("termsosinal\n");}
+   termo_com_sinal {insere_pilha(pilhaExpr, remove_pilha(pilhaTermo));}
 ;
 
 relacao:
@@ -451,7 +508,7 @@ termo:
       verificaOperacao(pilhaTermo, pilhaFator, tipo_operacao);
       adicionaCodigoOperacao(tipo_operacao);
    } |
-   fator {insere_pilha(pilhaTermo, remove_pilha(pilhaFator)); printf("fator\n");}
+   fator {insere_pilha(pilhaTermo, remove_pilha(pilhaFator));}
 ;
 
 fator:
@@ -461,7 +518,7 @@ fator:
    } |
    numero {insere_pilha(pilhaFator, tipo_variavel); } |
    boolean {insere_pilha(pilhaFator, tipo_variavel); } |
-   ABRE_PARENTESES expressao FECHA_PARENTESES 
+   ABRE_PARENTESES  expressao FECHA_PARENTESES
    {insere_pilha(pilhaFator, remove_pilha(pilhaExpr));} |
    NOT fator {
       tipo_fator = remove_pilha(pilhaFator);
@@ -521,11 +578,11 @@ int main (int argc, char** argv) {
    pilhaOpers = cria_pilha();
    pilhaRot = cria_pilha();
    pilhaNVars = cria_pilha();
+   pilhaNParams = cria_pilha();
 /* -------------------------------------------------------------------
  *  Inicia a Tabela de S�mbolos
  * ------------------------------------------------------------------- */
    tabela_simbolos = aloca_tabela_simbolos();
-   dmem = 0;
    num_vars = 0;
    deslocamento = 0;
    nivel_lexico = 0;

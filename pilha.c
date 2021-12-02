@@ -28,7 +28,8 @@ typedef struct simbolo_s {
     int tipo;
     int deslocamento;
     int rotulo;
-    
+    int parametros;
+    int *tiposParametros;
 }simbolo_t;
 
 
@@ -93,6 +94,7 @@ simbolo_t *cria_simbolo(char *nome, int categoria, int nivel_lexico, int desloca
     simbolo->tipo = tipo;
     simbolo->deslocamento = deslocamento;
     simbolo->rotulo = rotulo;
+    simbolo->parametros = 0;
 
     return simbolo;
 }
@@ -146,6 +148,12 @@ void mostra_simbolo(simbolo_t *simbolo)
     printf("nivel_lexico: %d\n", simbolo->nivel_lexico);
     printf("deslocamento: %d\n", simbolo->deslocamento);
     printf("tipo: %d\n", simbolo->tipo);
+    printf("parametros: ");
+
+    if (simbolo->parametros > 0)
+        for (int i = 0; i < simbolo->parametros; i++)
+           printf("%d ", simbolo->tiposParametros[i]);
+    printf("\n");
 }
 
 void mostra_tabela_simbolos(tabela_simbolos_t *tabela)
@@ -157,9 +165,23 @@ void mostra_tabela_simbolos(tabela_simbolos_t *tabela)
 
 void atualiza_tipo_variaveis_tabela_simbolos(tabela_simbolos_t *tabela, int tipo_variavel, int num_vars)
 {
-
     for (int i = tabela->topo; i > tabela->topo - num_vars; i--) {
         tabela->simbolos[i]->tipo = tipo_variavel;
     }
+}
 
+void atualiza_deslocamento_parametros_formais(tabela_simbolos_t *tabela, int num_vars)
+{
+    int deslocamento = -4;
+    int procedure = tabela->topo - num_vars;
+
+    tabela->simbolos[procedure]->parametros = num_vars;
+    tabela->simbolos[procedure]->tiposParametros = malloc(sizeof(int)*num_vars);
+
+    int nParam = 0;
+
+    for (int i = tabela->topo; i > tabela->topo - num_vars; i--) {
+        tabela->simbolos[i]->deslocamento = deslocamento--;
+        tabela->simbolos[procedure]->tiposParametros[nParam++] = tabela->simbolos[i]->tipo;
+    }
 }
