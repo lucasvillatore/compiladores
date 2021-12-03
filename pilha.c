@@ -3,11 +3,11 @@
 #include <string.h>
 
 enum tipos_dados{
-    TIPO_INTEGER, TIPO_BOOLEAN, TIPO_UNDEFINED
+    TIPO_INTEGER, TIPO_BOOLEAN, TIPO_UNDEFINED, TIPO_ADDR
 };
 
 enum tipos_categoria {
-    VARIAVEL_SIMPLES, PARAMETRO_FORMAL, PROCEDIMENTO
+    VARIAVEL_SIMPLES, PARAMETRO_FORMAL, PROCEDIMENTO, FUNCAO
 };
 
 enum tipos_relacao {
@@ -21,6 +21,7 @@ enum tipos_operacao {
 enum tipo_variavel_funcao {
     POR_VALOR, POR_REFERENCIA
 };
+
 typedef struct simbolo_s {
     char *nome;
     int categoria;
@@ -60,6 +61,16 @@ void adiciona_simbolo_tabela_simbolos(simbolo_t *simbolo, tabela_simbolos_t *tab
     }
 
     tabela->simbolos[tabela->topo] = simbolo;    
+}
+
+void atualiza_retorno_funcao(tabela_simbolos_t *tabela, int tipo_retorno)
+{
+    for (int i = tabela->topo; i >= 0; i--) {
+        if (tabela->simbolos[i]->categoria == FUNCAO) {
+            tabela->simbolos[i]->tipo = tipo_retorno;
+            break;
+        }
+    }
 }
 
 simbolo_t *remove_simbolo_tabela_simbolos(tabela_simbolos_t *tabela)
@@ -177,11 +188,12 @@ void atualiza_deslocamento_parametros_formais(tabela_simbolos_t *tabela, int num
 
     tabela->simbolos[procedure]->parametros = num_vars;
     tabela->simbolos[procedure]->tiposParametros = malloc(sizeof(int)*num_vars);
+    tabela->simbolos[procedure]->deslocamento = -4 - num_vars;
 
-    int nParam = 0;
+    int nParam = num_vars - 1;
 
     for (int i = tabela->topo; i > tabela->topo - num_vars; i--) {
         tabela->simbolos[i]->deslocamento = deslocamento--;
-        tabela->simbolos[procedure]->tiposParametros[nParam++] = tabela->simbolos[i]->tipo;
+        tabela->simbolos[procedure]->tiposParametros[nParam--] = tabela->simbolos[i]->tipo;
     }
 }

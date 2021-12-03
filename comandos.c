@@ -20,7 +20,21 @@ void adicionaCodigoDMEM(int num_vars)
 void adicionaCodigoCarregaValor(simbolo_t *simbolo)
 {
     char codigo[15];
-    sprintf(codigo, "CRVL %d, %d", simbolo->nivel_lexico, simbolo->deslocamento);
+    sprintf(codigo, "CRVL %d,%d", simbolo->nivel_lexico, simbolo->deslocamento);
+    geraCodigo(NULL, codigo);
+}
+
+void adicionaCodigoCarregaValorIndireto(simbolo_t *simbolo)
+{
+    char codigo[15];
+    sprintf(codigo, "CRVI %d,%d", simbolo->nivel_lexico, simbolo->deslocamento);
+    geraCodigo(NULL, codigo);
+}
+
+void adicionaCodigoCarregaEndereco(simbolo_t *simbolo)
+{
+    char codigo[15];
+    sprintf(codigo, "CREN %d,%d", simbolo->nivel_lexico, simbolo->deslocamento);
     geraCodigo(NULL, codigo);
 }
 
@@ -219,6 +233,13 @@ void adicionaCodigoArmazena(simbolo_t *simbolo)
 {
     char *codigo = (char *)malloc(sizeof(char) * 10);
     sprintf(codigo, "ARMZ %d,%d", simbolo->nivel_lexico, simbolo->deslocamento);
+    geraCodigo(NULL, codigo);
+}
+
+void adicionaCodigoArmazenaIndireto(simbolo_t *simbolo)
+{
+    char *codigo = (char *)malloc(sizeof(char) * 10);
+    sprintf(codigo, "ARMI %d,%d", simbolo->nivel_lexico, simbolo->deslocamento);
     geraCodigo(NULL, codigo);
 }
 

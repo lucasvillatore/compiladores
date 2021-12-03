@@ -1,12 +1,12 @@
 program cmdIf (input, output);
-var i: integer;
-procedure teste;
+var i,j,k: integer;
+
+function teste(i :integer):integer;
 begin
-   i:=1;
-end
+   teste:= 1;
+end;
 
 begin
-   teste;
-   write(i,1,i,1+2);  
+   k := teste(2);
 end. 
 
