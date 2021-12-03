@@ -195,7 +195,6 @@ declara_procedimento_sem_ponto_virgula:
 lista_parametros_formais: 
    ABRE_PARENTESES sessoes_parametros_formais FECHA_PARENTESES 
    {
-      printf("fecha parenteses lista parametros formais\n");
       nParams=0;
       while ((nParams = remove_pilha(pilhaNParams)) != -1)
          total_parametros+=nParams;
@@ -242,7 +241,7 @@ parametro_formal:
 ;
 
 var: 
-   VAR {num_vars=0;} declara_vars | ;
+   VAR {num_vars=0; deslocamento=0;} declara_vars | ;
 
 declara_vars: 
    declara_vars declara_var | 
@@ -355,54 +354,8 @@ variavel_atribuicao:
    {
       variavel_atribuicao = obtemSimbolo(token);
       tipo_variavel_atribuicao = variavel_atribuicao->tipo;
-
+      printf("\n\natribuiu %s - %d\n\n", token, variavel_atribuicao->tipo);
    } 
-;
-
-chama_procedure:
-   {
-      if (variavel_atribuicao->categoria != PROCEDIMENTO) {
-         imprimeErro("Função precisa ser atribuida a alguma variável");
-      } 
-   }
-   ABRE_PARENTESES {nParams=0;} lista_parametros_reais FECHA_PARENTESES 
-   {
-      printf("fecha parenteses chama procedure\n");
-      if (nParams != variavel_atribuicao->parametros)
-         imprimeErro("Chamada de procedure com número incorreto de parâmetros");
-   } |
-;
-
-lista_parametros_reais:
-   lista_parametros_reais VIRGULA parametro_real |
-   parametro_real 
-;
-
-parametro_real: 
-   { 
-      num_fator = 0; 
-      parametro_real = 1; 
-      printf("antes aqui\n");
-   } 
-   expressao 
-   {
-      printf("antes depois\n");
-    
-      printf("tipo_variavel = %d", tipo_variavel);
-      // tipo_variavel = variavel->tipo;
-    
-      parametro_real = 0;
-      if ((variavel_atribuicao->parametros == 0 || nParams > variavel_atribuicao->parametros))
-         imprimeErro("Chamada de subrotina com número incorreto de parâmetros");
-   
-      if (variavel_atribuicao->parametros > 0 && variavel_atribuicao->tiposParametros[nParams] > 9 && num_fator != 1 )
-         imprimeErro("Não é permitido expressões no parâmetro passada como referência");
-
-      if(!comparaTipoExpressao(variavel_atribuicao->tiposParametros[nParams], tipo_variavel)) 
-         imprimeErro("Parâmetro de tipo inválido");
-
-      nParams++;
-   }
 ;
 
 
@@ -435,7 +388,7 @@ write:
    WRITE 
    ABRE_PARENTESES 
    write_idents
-   FECHA_PARENTESES 
+   FECHA_PARENTESES { printf("passaq1222\n\n");}
 ;
 
 cond_while:
@@ -469,7 +422,7 @@ cond_if:
 ;
 
 if_then: 
-   IF expressao 
+   IF {printf("111\n\n");} expressao {printf("1112\n\n");}
    {
       rotulo_atual = criaRotulo();
       insere_pilha(pilhaRot, rotulo_atual);
@@ -494,6 +447,7 @@ variavel:
    {
       variavel = obtemSimbolo(token);
       tipo_variavel = variavel->tipo;
+      printf("agui\n");
    }
 ;
 
@@ -526,7 +480,7 @@ expressao:
       verificaRelacao(pilhaExpr, pilhaExpr, tipo_relacao);
       adicionaCodigoRelacao(tipo_relacao);
    } |
-   expressao_simples
+   expressao_simples { printf("passaq13333");}
 ;
 
 expressao_simples:
@@ -589,7 +543,6 @@ fator:
    {
       insere_pilha(pilhaFator, remove_pilha(pilhaExpr)); 
       num_fator++;
-      printf("fecha parenteses fator\n"); 
    } |
    NOT fator {
       tipo_fator = remove_pilha(pilhaFator);
@@ -608,47 +561,128 @@ fator:
 variavel_chamada_funcao:
    variavel    
    {
-      if (variavel_atribuicao->categoria == FUNCAO) {
-         adicionaCodigoAMEM('1');
-         num_fator += 2;
-      }else{
-         if (parametro_real && (variavel_atribuicao->tiposParametros[nParams] > 9) && variavel->tipo < 10 ){
-            adicionaCodigoCarregaEndereco(variavel);
-         }else if(variavel->tipo > 9 && variavel_atribuicao->tiposParametros[nParams] < 10) {
-            adicionaCodigoCarregaValorIndireto(variavel);
-         }else {
-            adicionaCodigoCarregaValor(variavel);
+      printf("passaq1\n\n");
+      if(variavel_atribuicao){
+         if (variavel->categoria == FUNCAO) {
+            
+            adicionaCodigoAMEM(1);
+            num_fator += 2;
+            insere_pilha(pilhaFator, variavel_atribuicao->tipo);
+            adicionaCodigoChamaProcedimento(variavel_atribuicao->rotulo, nivel_lexico); 
+         } else {
+            if (parametro_real){
+               printf("\n\n\n\n\n\n\n\n------%d %d %d \n\n",parametro_real , variavel_atribuicao->tiposParametros[nParams], variavel->tipo);
+            }
+            printf("\n\n\n\n\n\n\n\n------%d  \n\n",parametro_real);
+
+            if (parametro_real && (variavel_atribuicao->tiposParametros[nParams] > 9) && variavel->tipo < 10 ){
+               adicionaCodigoCarregaEndereco(variavel);
+            }else if(variavel_atribuicao->parametros > 0 && variavel->tipo > 9 && variavel_atribuicao->tiposParametros[nParams] < 10) {
+               adicionaCodigoCarregaValorIndireto(variavel);
+            }else {
+               adicionaCodigoCarregaValor(variavel);
+            }
+            
+            insere_pilha(pilhaFator, tipo_variavel); 
+            num_fator++;
          }
-         
-         insere_pilha(pilhaFator, tipo_variavel); 
+      } else {
+         printf("passaqzz\n\n");
+         adicionaCodigoCarregaValor(variavel);
          num_fator++;
+         insere_pilha(pilhaFator, tipo_variavel); 
       }
+         
    } 
    | variavel    
    {
       num_fator += 2;
-      adicionaCodigoAMEM('1');
+      adicionaCodigoAMEM(1); 
    } 
    chama_funcao
+;
+
+chama_procedure:
+   {
+      if (variavel_atribuicao->categoria != PROCEDIMENTO) {
+         imprimeErro("Função precisa ser atribuida a alguma variável");
+      } 
+   }
+   ABRE_PARENTESES 
+   {
+      insere_pilha(pilhaNParams, nParams);
+      nParams=0;
+   }
+   lista_parametros_reais FECHA_PARENTESES 
+   {
+      printf("fecha parenteses chama procedure\n");
+      if (nParams != variavel_atribuicao->parametros)
+         imprimeErro("Chamada de procedure com número incorreto de parâmetros");
+
+      nParams = remove_pilha(pilhaNParams);
+   } |
 ;
 
 chama_funcao:
    ABRE_PARENTESES 
    { 
-      printf("Chama função começo\n");
+      printf("------------------nparams %d\n\n", nParams);
+      insere_pilha(pilhaNParams, nParams);
       nParams=0; 
+      printf("------------------nparams %d\n\n", nParams);
       adiciona_simbolo_tabela_simbolos(variavel_atribuicao, pilhaAtrib);
       variavel_atribuicao = variavel;
    } 
-   lista_parametros_reais FECHA_PARENTESES 
+   lista_parametros_reais {printf("------------------nparams %d\n\n", nParams);} FECHA_PARENTESES 
    {
-      printf("Chama função fim\n");
-      variavel_atribuicao = remove_simbolo_tabela_simbolos(pilhaAtrib);
-
       if (nParams != variavel_atribuicao->parametros)
          imprimeErro("Chamada de funcao com número incorreto de parâmetros");
+
+      adicionaCodigoChamaProcedimento(variavel_atribuicao->rotulo, nivel_lexico); 
+
+      variavel_atribuicao = remove_simbolo_tabela_simbolos(pilhaAtrib);
+ 
+      tipo_variavel_atribuicao = variavel_atribuicao->tipo;
+      nParams = remove_pilha(pilhaNParams);
+      insere_pilha(pilhaFator, variavel_atribuicao->tipo); 
+     
    } 
 ;
+
+lista_parametros_reais:
+   lista_parametros_reais VIRGULA parametro_real |
+   parametro_real 
+;
+
+parametro_real: 
+   { 
+      num_fator = 0; 
+      parametro_real = 1; 
+      printf("antes aqui %d\n",  num_fator);
+      // adiciona_simbolo_tabela_simbolos(variavel_atribuicao, pilhaAtrib);
+      // variavel_atribuicao = NULL;
+   } 
+   expressao 
+   {
+      // variavel_atribuicao = remove_simbolo_tabela_simbolos(pilhaAtrib);
+
+      parametro_real = 0;
+      if ((variavel_atribuicao->parametros == 0 || nParams > variavel_atribuicao->parametros))
+         imprimeErro("Chamada de subrotina com número incorreto de parâmetros");
+
+      if (variavel_atribuicao->tiposParametros[nParams] > 9 && num_fator != 1 )
+         imprimeErro("Não é permitido expressões no parâmetro passada como referência");
+
+      if(!comparaTipoExpressao(variavel_atribuicao->tiposParametros[nParams], tipo_variavel)) 
+         imprimeErro("Parâmetro de tipo inválido");
+
+      nParams++;
+
+      printf("antes depois\n");
+   }
+;
+
+
 operacao:
    MAIS 
    {

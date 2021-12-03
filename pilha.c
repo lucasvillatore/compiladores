@@ -76,7 +76,7 @@ void atualiza_retorno_funcao(tabela_simbolos_t *tabela, int tipo_retorno)
 simbolo_t *remove_simbolo_tabela_simbolos(tabela_simbolos_t *tabela)
 {
     simbolo_t *simbolo;
-    if (tabela->topo == 0) {
+    if (tabela->topo == -1) {
         return NULL;
     }
 
