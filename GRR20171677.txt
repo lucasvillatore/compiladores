@@ -1,0 +1,37 @@
+Alunos: Lucas Block Villatore GRR20171677
+        Luiz Eduardo Simões GRR20163079
+
+
+Descreva o que foi alterado para o booleano funcionar.
+
+Para adicionar o tipo booleano, adicionamos no arquivo compilador.l o token booleano, no compilador.h,  adicionar simb_boolean no enum de simbolos no compilador.h e 
+também adicionar no compilador.y %token BOOLEANO. Também adicionamos os tokens de True e False.
+Nas regras de derivação, na regra "fator", adicionamos uma regra BOOLEAN, similar a regra do inteiro. Nela guardamos o tipo da variável para 
+utilizarmos em outras partes da derivação e geramos o código carrega constante 1 para true e 0 para false.
+Nas regras de atribuição, verificamos qual é o tipo da variável que estamos atribuindo e também o tipo de retorno da expressão para não atribuirmos incorretamente os valores.
+
+O que deveria ser alterado para incluir reais (inclusive coerção de tipos)?
+
+Para adicionar o tipo real no nosso compilador, primeiro devemos adicionar o token REAL no arquivo compilador.l, adicionar  simb_real  no enum de simbolos no compilador.h e 
+também adicionar no compilador.y %token REAL.
+Nas regras de derivação, na regra "fator", a regra para REAL deve junta da regra de inteiro, pois quando o real não casas decimais, ele pode ser tanto um inteiro quanto
+um real. Assim será necessário fazer essas verificações na hora da atribuição.
+
+Atualmente temos 4 tipos possíveis dentro do nosso código:
+0 - para variáveis inteiras simples
+1 - para variáveis booleanas simples
+10 - para variáveis inteiras passadas como referência
+11 - para variáveis booleanas passadas como referência
+
+Nesse caso, adicionaríamos também:
+
+2 - para variáveis reais simples
+12 - para variáveis reais passadas como referência
+
+No quesito atribuição, quando estivermos atribuindo para uma variável do tipo real, só poderemos atribuir caso seja algumas dessas regras:  
+
+real <- real
+real <- integer
+real <- real + integer
+
+Na atribuição para uma variável do tipo inteiro, não deve permitir a atribuição quando um dos argumentos é do tipo real. Permitir somente de inteiro para inteiro.
