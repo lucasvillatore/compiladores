@@ -1,0 +1,9 @@
+Alunos: Lucas Block Villatore GRR20171677
+        Luiz Eduardo Simões GRR20163079
+
+
+
+Para compilar o programa:
+    make
+
+Para facilitar na comparação dos resultados entre o nosso compilador e o compilador resposta, utilizamos a flag -w no diff para ignorar diferenças de espaçamentos.
