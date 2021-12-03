@@ -9,8 +9,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "compilador.h"
+#include "tabela-simbolos.c"
 #include "pilha.c"
-#include "pilha-gen.c"
 #include "comandos.c"
 
 tabela_simbolos_t *tabela_simbolos;
@@ -33,6 +33,7 @@ int nParams;
 int tipo_parametro;
 int num_fator;
 int parametro_real;
+int writing;
 
 simbolo_t *novo_simbolo;
 simbolo_t *variavel;
@@ -48,9 +49,6 @@ pilha_t *pilhaOpers;
 pilha_t *pilhaRot;
 pilha_t *pilhaNParams;
 
-void verificaTipos(pilha_t *p1, pilha_t *p2, int tipoComparacao);
-
-
 int criaRotulo()
 {
    return num_rotulo++;
@@ -60,14 +58,12 @@ simbolo_t *obtemSimbolo(char *token)
 {
    simbolo_t *simbolo = busca_simbolo_sem_nivel_lexico(tabela_simbolos, token);
 
-   printf("token = %s\n", token);
    if (!simbolo) {
       imprimeErro("Variável não existe na tabela de símbolos");
    }
 
    return simbolo;
 }
-
 
 %}
 
@@ -151,7 +147,7 @@ declara_funcao_sem_ponto_virgula:
       }
 
       novo_simbolo = cria_simbolo_procedure(token, FUNCAO, nivel_lexico, rotulo_atual);
-      adiciona_simbolo_tabela_simbolos(novo_simbolo, tabela_simbolos);
+      adiciona_simbolo(novo_simbolo, tabela_simbolos);
        
    } lista_parametros_formais DOIS_PONTOS tipo 
    {
@@ -161,7 +157,7 @@ declara_funcao_sem_ponto_virgula:
    { num_vars = 0; }
    bloco
    {
-      remove_multiplos_simbolos(tabela_simbolos, num_vars);
+      remove_multiplos(tabela_simbolos, num_vars);
    }
 ;
 
@@ -178,13 +174,13 @@ declara_procedimento_sem_ponto_virgula:
       }
 
       novo_simbolo = cria_simbolo_procedure(token, PROCEDIMENTO, nivel_lexico, rotulo_atual);
-      adiciona_simbolo_tabela_simbolos(novo_simbolo, tabela_simbolos);
+      adiciona_simbolo(novo_simbolo, tabela_simbolos);
        
    } lista_parametros_formais PONTO_E_VIRGULA
    { num_vars = 0; }
    bloco
    {
-      remove_multiplos_simbolos(tabela_simbolos, num_vars);
+      remove_multiplos(tabela_simbolos, num_vars);
    }
 ;
 
@@ -212,7 +208,7 @@ parametros_formais:
    {num_vars = 0; }
    lista_id_parametros_formais DOIS_PONTOS tipo 
    {
-      atualiza_tipo_variaveis_tabela_simbolos(tabela_simbolos, tipo_variavel + tipo_parametro, num_vars);
+      atualiza_tipo_variaveis(tabela_simbolos, tipo_variavel + tipo_parametro, num_vars);
 
       insere_pilha(pilhaNParams, num_vars);
    }
@@ -232,7 +228,7 @@ parametro_formal:
       num_vars++;
 
       novo_simbolo = cria_simbolo(token, PARAMETRO_FORMAL, nivel_lexico, 0, TIPO_UNDEFINED, 0);
-      adiciona_simbolo_tabela_simbolos(novo_simbolo, tabela_simbolos);
+      adiciona_simbolo(novo_simbolo, tabela_simbolos);
    }
 ;
 
@@ -251,7 +247,7 @@ declara_var:
    lista_id_var DOIS_PONTOS
    tipo
    {
-      atualiza_tipo_variaveis_tabela_simbolos(tabela_simbolos, tipo_variavel, num_vars);
+      atualiza_tipo_variaveis(tabela_simbolos, tipo_variavel, num_vars);
       adicionaCodigoAMEM(num_vars);
    }
    PONTO_E_VIRGULA
@@ -273,7 +269,7 @@ lista_id_var:
 
       num_vars++;
       novo_simbolo = cria_simbolo(token, VARIAVEL_SIMPLES, nivel_lexico, deslocamento, TIPO_UNDEFINED, 0);
-      adiciona_simbolo_tabela_simbolos(novo_simbolo, tabela_simbolos);
+      adiciona_simbolo(novo_simbolo, tabela_simbolos);
       deslocamento++;
    } 
    | IDENT 
@@ -286,7 +282,7 @@ lista_id_var:
       num_vars++;
 
       novo_simbolo = cria_simbolo(token, VARIAVEL_SIMPLES, nivel_lexico, deslocamento, TIPO_UNDEFINED, 0);
-      adiciona_simbolo_tabela_simbolos(novo_simbolo, tabela_simbolos);
+      adiciona_simbolo(novo_simbolo, tabela_simbolos);
       deslocamento++;
    }
 ;
@@ -336,7 +332,7 @@ atribuicao:
       if (!comparaTipoExpressao(tipo_variavel_atribuicao, remove_pilha(pilhaExpr)) )
          imprimeErro("Atribuicao com tipo de variavel invalido");
       
-      if ((variavel_atribuicao->tipo > 9)){
+      if (ehVariavelReferencia(variavel_atribuicao->tipo)){
          adicionaCodigoArmazenaIndireto(variavel_atribuicao);
       }
       else{
@@ -350,7 +346,6 @@ variavel_atribuicao:
    {
       variavel_atribuicao = obtemSimbolo(token);
       tipo_variavel_atribuicao = variavel_atribuicao->tipo;
-      printf("\n\natribuiu %s - %d\n\n", token, variavel_atribuicao->tipo);
    } 
 ;
 
@@ -382,9 +377,11 @@ write_idents:
 
 write:
    WRITE 
+   {writing = 1;}
    ABRE_PARENTESES 
    write_idents
-   FECHA_PARENTESES { printf("passaq1222\n\n");}
+   FECHA_PARENTESES
+   {writing = 0;}
 ;
 
 cond_while:
@@ -418,7 +415,7 @@ cond_if:
 ;
 
 if_then: 
-   IF {printf("111\n\n");} expressao {printf("1112\n\n");}
+   IF expressao
    {
       rotulo_atual = criaRotulo();
       insere_pilha(pilhaRot, rotulo_atual);
@@ -443,7 +440,6 @@ variavel:
    {
       variavel = obtemSimbolo(token);
       tipo_variavel = variavel->tipo;
-      printf("agui\n");
    }
 ;
 
@@ -476,7 +472,7 @@ expressao:
       verificaRelacao(pilhaExpr, pilhaExpr, tipo_relacao);
       adicionaCodigoRelacao(tipo_relacao);
    } |
-   expressao_simples { printf("passaq13333");}
+   expressao_simples 
 ;
 
 expressao_simples:
@@ -557,25 +553,20 @@ fator:
 variavel_chamada_funcao:
    variavel    
    {
-      printf("passaq1\n\n");
       if(variavel_atribuicao){
-         if (variavel->categoria == FUNCAO) {
-            
+         if (variavel->categoria == FUNCAO) {            
             adicionaCodigoAMEM(1);
             num_fator += 2;
             insere_pilha(pilhaFator, variavel_atribuicao->tipo);
             adicionaCodigoChamaProcedimento(variavel_atribuicao->rotulo, nivel_lexico); 
          } else {
-            if (parametro_real){
-               printf("\n\n\n\n\n\n\n\n------%d %d %d \n\n",parametro_real , variavel_atribuicao->tiposParametros[nParams], variavel->tipo);
-            }
-            printf("\n\n\n\n\n\n\n\n------%d  \n\n",parametro_real);
-
-            if (parametro_real && (variavel_atribuicao->tiposParametros[nParams] > 9) && variavel->tipo < 10 ){
+            if (parametro_real && (variavel_atribuicao->tiposParametros[nParams] > 9) && !ehVariavelReferencia(variavel->tipo)){
                adicionaCodigoCarregaEndereco(variavel);
-            }else if(variavel_atribuicao->parametros > 0 && variavel->tipo > 9 && variavel_atribuicao->tiposParametros[nParams] < 10) {
+            }else if(variavel_atribuicao->parametros > 0 && ehVariavelReferencia(variavel->tipo) && !ehVariavelReferencia(variavel_atribuicao->tiposParametros[nParams])) {
                adicionaCodigoCarregaValorIndireto(variavel);
-            }else {
+            }else if(writing && ehVariavelReferencia(variavel->tipo)) {
+               adicionaCodigoCarregaValorIndireto(variavel);
+            } else {
                adicionaCodigoCarregaValor(variavel);
             }
             
@@ -583,7 +574,6 @@ variavel_chamada_funcao:
             num_fator++;
          }
       } else {
-         printf("passaqzz\n\n");
          adicionaCodigoCarregaValor(variavel);
          num_fator++;
          insere_pilha(pilhaFator, tipo_variavel); 
@@ -611,7 +601,6 @@ chama_procedure:
    }
    lista_parametros_reais FECHA_PARENTESES 
    {
-      printf("fecha parenteses chama procedure\n");
       if (nParams != variavel_atribuicao->parametros)
          imprimeErro("Chamada de procedure com número incorreto de parâmetros");
 
@@ -622,21 +611,19 @@ chama_procedure:
 chama_funcao:
    ABRE_PARENTESES 
    { 
-      printf("------------------nparams %d\n\n", nParams);
       insere_pilha(pilhaNParams, nParams);
       nParams=0; 
-      printf("------------------nparams %d\n\n", nParams);
-      adiciona_simbolo_tabela_simbolos(variavel_atribuicao, pilhaAtrib);
+      adiciona_simbolo(variavel_atribuicao, pilhaAtrib);
       variavel_atribuicao = variavel;
    } 
-   lista_parametros_reais {printf("------------------nparams %d\n\n", nParams);} FECHA_PARENTESES 
+   lista_parametros_reais FECHA_PARENTESES 
    {
       if (nParams != variavel_atribuicao->parametros)
          imprimeErro("Chamada de funcao com número incorreto de parâmetros");
 
       adicionaCodigoChamaProcedimento(variavel_atribuicao->rotulo, nivel_lexico); 
 
-      variavel_atribuicao = remove_simbolo_tabela_simbolos(pilhaAtrib);
+      variavel_atribuicao = remove_simbolo(pilhaAtrib);
  
       tipo_variavel_atribuicao = variavel_atribuicao->tipo;
       nParams = remove_pilha(pilhaNParams);
@@ -654,27 +641,20 @@ parametro_real:
    { 
       num_fator = 0; 
       parametro_real = 1; 
-      printf("antes aqui %d\n",  num_fator);
-      // adiciona_simbolo_tabela_simbolos(variavel_atribuicao, pilhaAtrib);
-      // variavel_atribuicao = NULL;
    } 
    expressao 
    {
-      // variavel_atribuicao = remove_simbolo_tabela_simbolos(pilhaAtrib);
-
       parametro_real = 0;
       if ((variavel_atribuicao->parametros == 0 || nParams > variavel_atribuicao->parametros))
          imprimeErro("Chamada de subrotina com número incorreto de parâmetros");
 
-      if (variavel_atribuicao->tiposParametros[nParams] > 9 && num_fator != 1 )
+      if (ehVariavelReferencia(variavel_atribuicao->tiposParametros[nParams]) && num_fator != 1 )
          imprimeErro("Não é permitido expressões no parâmetro passada como referência");
 
       if(!comparaTipoExpressao(variavel_atribuicao->tiposParametros[nParams], tipo_variavel)) 
          imprimeErro("Parâmetro de tipo inválido");
 
       nParams++;
-
-      printf("antes depois\n");
    }
 ;
 
@@ -737,6 +717,7 @@ int main (int argc, char** argv) {
    nivel_lexico = 0;
    num_rotulo = 0;
    parametro_real = 0;
+   writing=0;
    yyin=fp;
 
    yyparse();
