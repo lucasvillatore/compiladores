@@ -68,10 +68,6 @@ simbolo_t *obtemSimbolo(char *token)
    return simbolo;
 }
 
-// int comparaTipoExpressao(int tipo_simbolo, int tipo_expressao)
-// {
-//    return ((tipo_simbolo == tipo_expressao) || ((tipo_simbolo - 10) == tipo_expressao) || (tipo_simbolo == (tipo_expressao - 10)));
-// }
 
 %}
 
