@@ -34,6 +34,7 @@ int tipo_parametro;
 int num_fator;
 int parametro_real;
 int writing;
+int num_vars_bloco;
 
 simbolo_t *novo_simbolo;
 simbolo_t *variavel;
@@ -91,7 +92,7 @@ programa:
    ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA
    bloco PONTO 
    {
-      adicionaCodigoDMEM(num_vars);
+      adicionaCodigoDMEM(num_vars_bloco);
       geraCodigo (NULL, "PARA");
       
    };
@@ -99,9 +100,16 @@ programa:
 bloco:
    {{ mostra_tabela_simbolos(tabela_simbolos); }}
    parte_declara_vars
-
+   
+   {      
+      insere_pilha(pilhaRot, (rotulo_atual = criaRotulo()));
+      adicionaCodigoDesviaSempre(rotulo_atual);
+   }
    parte_declara_subrotinas
-
+   {
+      adicionaCodigoNada(remove_pilha(pilhaRot));
+   }
+   
    comando_composto;
 
 parte_declara_vars: var;
@@ -112,20 +120,21 @@ parte_declara_subrotinas:
 declara_subrotina:
    {
       nivel_lexico++;
-      insere_pilha(pilhaRot, (rotulo_atual = criaRotulo()));
-      adicionaCodigoDesviaSempre(rotulo_atual);
       adicionaCodigoEntraProcedimento((rotulo_atual = criaRotulo()), nivel_lexico);
       insere_pilha(pilhaNVars, num_vars);
+      insere_pilha(pilhaNVars, num_vars_bloco);
       total_parametros=0;
    } 
    declara_tipo_subrotina
    { 
-      adicionaCodigoDMEM(num_vars); 
+      adicionaCodigoDMEM(num_vars_bloco); 
+      num_vars_bloco = remove_pilha(pilhaNVars);
       adicionaCodigoRetornaProcedimento(nivel_lexico, total_parametros);
+
+      remove_multiplos(tabela_simbolos, total_parametros);
 
       nivel_lexico--;
       num_vars = remove_pilha(pilhaNVars);
-      adicionaCodigoNada(remove_pilha(pilhaRot));
    }
 ;
 
@@ -233,7 +242,7 @@ parametro_formal:
 ;
 
 var: 
-   VAR {num_vars=0; deslocamento=0;} declara_vars | ;
+   VAR {deslocamento=0;num_vars_bloco=0;} declara_vars | ;
 
 declara_vars: 
    declara_vars declara_var | 
@@ -242,12 +251,13 @@ declara_vars:
 
 declara_var: 
    { 
-
+      num_vars=0;
    }
    lista_id_var DOIS_PONTOS
    tipo
    {
       atualiza_tipo_variaveis(tabela_simbolos, tipo_variavel, num_vars);
+      num_vars_bloco+=num_vars;
       adicionaCodigoAMEM(num_vars);
    }
    PONTO_E_VIRGULA
@@ -399,6 +409,9 @@ cond_while:
       rotulo_atual = criaRotulo();
       insere_pilha(pilhaRot, rotulo_atual);
       adicionaDesviaSeFalso(rotulo_atual); 
+
+      if (tipo_relacao == -1) 
+         imprimeErro("Expressão inválida na condição");
    }
    DO 
    comando_sem_rotulo 
@@ -423,6 +436,9 @@ if_then:
       rotulo_atual = criaRotulo();
       insere_pilha(pilhaRot, rotulo_atual);
       adicionaDesviaSeFalso(rotulo_atual); 
+
+      if (tipo_relacao == -1) 
+         imprimeErro("Expressão inválida na condição");
    }
    THEN comando_sem_rotulo
    {
@@ -474,6 +490,7 @@ expressao:
       tipo_relacao = remove_pilha(pilhaRelac);
       verificaRelacao(pilhaExpr, pilhaExpr, tipo_relacao);
       adicionaCodigoRelacao(tipo_relacao);
+      tipo_variavel = TIPO_BOOLEAN;
    } |
    expressao_simples 
 ;
@@ -563,13 +580,16 @@ variavel_chamada_funcao:
             insere_pilha(pilhaFator, variavel_atribuicao->tipo);
             adicionaCodigoChamaProcedimento(variavel_atribuicao->rotulo, nivel_lexico); 
          } else {
-            if (parametro_real && (variavel_atribuicao->tiposParametros[nParams] > 9) && !ehVariavelReferencia(variavel->tipo)){
+            if (parametro_real && ehVariavelReferencia(variavel_atribuicao->tiposParametros[nParams]) && !ehVariavelReferencia(variavel->tipo)){
                adicionaCodigoCarregaEndereco(variavel);
             }else if(variavel_atribuicao->parametros > 0 && ehVariavelReferencia(variavel->tipo) && !ehVariavelReferencia(variavel_atribuicao->tiposParametros[nParams])) {
                adicionaCodigoCarregaValorIndireto(variavel);
             }else if(writing && ehVariavelReferencia(variavel->tipo)) {
                adicionaCodigoCarregaValorIndireto(variavel);
-            } else {
+            }else if(variavel_atribuicao->parametros == 0 && ehVariavelReferencia(variavel->tipo)) {
+               adicionaCodigoCarregaValorIndireto(variavel);
+            }
+             else {
                adicionaCodigoCarregaValor(variavel);
             }
             
@@ -581,7 +601,6 @@ variavel_chamada_funcao:
          num_fator++;
          insere_pilha(pilhaFator, tipo_variavel); 
       }
-         
    } 
    | variavel    
    {
@@ -600,15 +619,21 @@ chama_procedure:
    ABRE_PARENTESES 
    {
       insere_pilha(pilhaNParams, nParams);
+      
       nParams=0;
+      printf("\n\n%d\n\n", nParams);
    }
-   lista_parametros_reais FECHA_PARENTESES 
+   lista_parametros_reais  
+   FECHA_PARENTESES
    {
+       printf("vai resetar %d\n\n", nParams);
       if (nParams != variavel_atribuicao->parametros)
          imprimeErro("Chamada de procedure com número incorreto de parâmetros");
 
       nParams = remove_pilha(pilhaNParams);
-   } |
+      printf("resetou %d\n\n", nParams);
+   }
+   |
 ;
 
 chama_funcao:
@@ -637,7 +662,7 @@ chama_funcao:
 
 lista_parametros_reais:
    lista_parametros_reais VIRGULA parametro_real |
-   parametro_real 
+   parametro_real {}
 ;
 
 parametro_real: 
@@ -653,6 +678,8 @@ parametro_real:
 
       if (ehVariavelReferencia(variavel_atribuicao->tiposParametros[nParams]) && num_fator != 1 )
          imprimeErro("Não é permitido expressões no parâmetro passada como referência");
+
+      printf("  %d %d \n\n ", tipo_variavel, tipo_relacao );
 
       if(!comparaTipoExpressao(variavel_atribuicao->tiposParametros[nParams], tipo_variavel)) 
          imprimeErro("Parâmetro de tipo inválido");
@@ -721,6 +748,8 @@ int main (int argc, char** argv) {
    num_rotulo = 0;
    parametro_real = 0;
    writing=0;
+   num_vars_bloco=0;
+   tipo_relacao = -1;
    yyin=fp;
 
    yyparse();

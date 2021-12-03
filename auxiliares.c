@@ -32,7 +32,7 @@ int relacoesInteiras(int tipoRelacao)
 void verificaRelacao(pilha_t *p1, pilha_t *p2, int tipoRelacao){
    int t1 = remove_pilha(p1), t2 = remove_pilha(p2);
 
-   if (t1 != t2)
+   if (!comparaTipoExpressao(t1, t2))
       imprimeErro("Tipos diferentes na relação");
 
     if (t1 == TIPO_BOOLEAN && relacoesInteiras(tipoRelacao))
