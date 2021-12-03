@@ -332,6 +332,9 @@ atribuicao:
       if (!comparaTipoExpressao(tipo_variavel_atribuicao, remove_pilha(pilhaExpr)) )
          imprimeErro("Atribuicao com tipo de variavel invalido");
       
+      if(nivel_lexico < variavel_atribuicao->nivel_lexico)
+         imprimeErro("Atribuicao de função invalida nesse nível léxico");
+
       if (ehVariavelReferencia(variavel_atribuicao->tipo)){
          adicionaCodigoArmazenaIndireto(variavel_atribuicao);
       }

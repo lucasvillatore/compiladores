@@ -14,7 +14,8 @@ begin
       end;             
    write(n,k);        
 end;                      
-begin                          
+begin        
+                     
    write(f(3,m),m); 
 end. 
 
