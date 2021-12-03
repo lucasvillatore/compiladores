@@ -157,10 +157,15 @@ int operacaoBoleana(int tipoComparacao)
     return (tipoComparacao == OPERACAO_AND || tipoComparacao == OPERACAO_OR);
 }
 
+int comparaTipoExpressao(int tipo_simbolo, int tipo_expressao)
+{
+   return ((tipo_simbolo == tipo_expressao) || ((tipo_simbolo - 10) == tipo_expressao) || (tipo_simbolo == (tipo_expressao - 10)));
+}
+
 void verificaOperacao(pilha_t *p1, pilha_t *p2, int tipoComparacao){
     int t1 = remove_pilha(p1), t2 = remove_pilha(p2);
 
-    if (t1 != t2)
+    if (!comparaTipoExpressao(t1, t2))
        imprimeErro("Tipos diferentes na operação");
 
     if ((t1 == TIPO_INTEGER && operacaoBoleana(tipoComparacao)) || 
